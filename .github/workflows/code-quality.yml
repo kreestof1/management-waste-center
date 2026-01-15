@@ -1,0 +1,62 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        directory: [frontend, api]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.directory }}/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: ./${{ matrix.directory }}
+        run: npm ci
+      
+      - name: Run ESLint
+        working-directory: ./${{ matrix.directory }}
+        run: npm run lint
+
+  typescript-check:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        directory: [frontend, api]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.directory }}/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: ./${{ matrix.directory }}
+        run: npm ci
+      
+      - name: Type check
+        working-directory: ./${{ matrix.directory }}
+        run: npx tsc --noEmit

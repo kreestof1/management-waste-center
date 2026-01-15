@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: waste-mongodb-local
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: waste-management
+    volumes:
+      - mongodb_local_data:/data/db
+    networks:
+      - waste-network
+
+volumes:
+  mongodb_local_data:
+
+networks:
+  waste-network:
+    driver: bridge

@@ -1,0 +1,47 @@
+name: Dependency Update
+
+on:
+  schedule:
+    # Run every Monday at 9:00 AM
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  update-dependencies:
+    name: Update Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+      
+      - name: Update Frontend Dependencies
+        working-directory: ./frontend
+        run: |
+          npm update
+          npm audit fix --audit-level=moderate
+      
+      - name: Update API Dependencies
+        working-directory: ./api
+        run: |
+          npm update
+          npm audit fix --audit-level=moderate
+      
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore: update dependencies'
+          title: 'chore: Weekly dependency updates'
+          body: |
+            Automated dependency updates
+            
+            This PR updates npm dependencies to their latest versions.
+            Please review the changes carefully before merging.
+          branch: dependency-updates
+          delete-branch: true

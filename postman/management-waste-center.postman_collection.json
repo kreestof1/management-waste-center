@@ -1,0 +1,192 @@
+{
+  "info": {
+    "name": "Management Waste Center API",
+    "description": "Collection Postman pour l'API de gestion de centre de traitement des déchets",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "health"]
+        },
+        "description": "Vérifie que l'API fonctionne correctement"
+      }
+    },
+    {
+      "name": "Wastes",
+      "item": [
+        {
+          "name": "Get All Wastes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/wastes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "wastes"]
+            },
+            "description": "Récupère la liste de tous les déchets"
+          }
+        },
+        {
+          "name": "Get All Wastes with Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/wastes?status=collected&type=plastic&startDate=2026-01-01&endDate=2026-12-31",
+              "host": ["{{base_url}}"],
+              "path": ["api", "wastes"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "collected",
+                  "description": "Filtrer par statut (collected, processing, processed, recycled)"
+                },
+                {
+                  "key": "type",
+                  "value": "plastic",
+                  "description": "Filtrer par type (plastic, glass, paper, metal, organic, electronic, hazardous, other)"
+                },
+                {
+                  "key": "startDate",
+                  "value": "2026-01-01",
+                  "description": "Date de début"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2026-12-31",
+                  "description": "Date de fin"
+                }
+              ]
+            },
+            "description": "Récupère les déchets avec filtres optionnels"
+          }
+        },
+        {
+          "name": "Get Waste by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/wastes/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "wastes", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{waste_id}}",
+                  "description": "ID du déchet"
+                }
+              ]
+            },
+            "description": "Récupère un déchet spécifique par son ID"
+          }
+        },
+        {
+          "name": "Create Waste",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"plastic\",\n  \"weight\": 25.5,\n  \"collectionDate\": \"2026-01-15T10:00:00Z\",\n  \"status\": \"collected\",\n  \"description\": \"Bouteilles plastiques collectées\",\n  \"location\": \"Zone A - Conteneur 3\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/wastes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "wastes"]
+            },
+            "description": "Crée un nouveau déchet"
+          }
+        },
+        {
+          "name": "Update Waste",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"processing\",\n  \"description\": \"En cours de traitement\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/wastes/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "wastes", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{waste_id}}",
+                  "description": "ID du déchet"
+                }
+              ]
+            },
+            "description": "Met à jour un déchet existant"
+          }
+        },
+        {
+          "name": "Delete Waste",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/wastes/:id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "wastes", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{waste_id}}",
+                  "description": "ID du déchet"
+                }
+              ]
+            },
+            "description": "Supprime un déchet"
+          }
+        },
+        {
+          "name": "Get Waste Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/wastes/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "wastes", "stats"]
+            },
+            "description": "Récupère les statistiques des déchets (totaux, par type, par statut)"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "waste_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
