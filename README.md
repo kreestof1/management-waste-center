@@ -1,6 +1,17 @@
-# Management Waste Center
+# Container Fill-Level Tracking System
 
-Application de gestion de centre de traitement des déchets avec frontend React et API Node.js.
+Système de suivi du niveau de remplissage des conteneurs pour déchetteries avec interface React et API Node.js.
+
+## 🎯 Vue d'ensemble
+
+Application web permettant de déclarer et suivre en temps réel l'état de remplissage des conteneurs (vide/plein) dans les déchetteries. Le système inclut :
+
+- **Suivi en temps réel** : Mises à jour instantanées via WebSocket
+- **Gestion multi-centres** : Support de plusieurs déchetteries
+- **Anti-spam intelligent** : Throttling de 60 secondes par conteneur/utilisateur
+- **Authentification & Rôles** : Système JWT avec 5 niveaux d'accès
+- **Tableau de bord gestionnaire** : Statistiques, alertes, et gestion
+- **Historique complet** : Timeline des changements d'état avec audit trail
 
 ## 🏗️ Structure du Projet
 
@@ -9,7 +20,9 @@ management-waste-center/
 ├── frontend/          # Application React + Vite + MUI
 ├── api/              # API Node.js + Express + TypeScript + Mongoose
 ├── infra/            # Configuration Docker et Nginx
-├── documentation/    # Spécifications et documentation
+├── documentation/    # Spécifications et plan d'implémentation
+├── postman/          # Collection Postman pour tests API
+├── scripts/          # Scripts d'automatisation (PowerShell/Bash)
 ├── .github/          # Workflows CI/CD
 └── docker-compose.yml
 ```
@@ -49,7 +62,10 @@ management-waste-center/
 
    L'application sera accessible sur:
    - Frontend: <http://localhost:3000>
-   - API: <http://localhost:5000>   - API Docs (Swagger): http://localhost:5000/api-docs   - MongoDB: localhost:27017
+   - API: <http://localhost:5000>
+   - API Docs (Swagger): http://localhost:5000/api-docs
+   - MongoDB: localhost:27017
+   - Redis: localhost:6379 (pour le throttling)
 
 4. **Démarrage en développement local**
 
@@ -85,24 +101,29 @@ management-waste-center/
 ### Frontend
 
 - React 18
-- Vite
+- Vite 5
 - Material-UI (MUI)
-- Axios
-- React Router
+- Axios (HTTP client)
+- React Router 6
+- Socket.IO Client (real-time updates)
 
 ### Backend
 
-- Node.js
-- Express
-- TypeScript
-- MongoDB & Mongoose
-- JWT Authentication
+- Node.js 18
+- Express 4
+- TypeScript 5
+- MongoDB & Mongoose 8
+- JWT Authentication (jsonwebtoken + bcryptjs)
+- Socket.IO (WebSocket server)
+- Redis / ioredis (throttling anti-spam)
+- Swagger (API documentation)
 
 ### Infrastructure
 
 - Docker & Docker Compose
 - Nginx (reverse proxy)
-- MongoDB
+- MongoDB 7
+- Redis (optional, for throttling)
 
 ## 🧪 Tests
 
@@ -118,18 +139,20 @@ npm test
 
 ## 📚 Documentation
 
-- [Spécifications Fonctionnelles](./documentation/specifications-fonctionnelles.md)
-- [Spécifications Techniques](./documentation/specifications-techniques.md)
+- [Spécifications Fonctionnelles](./documentation/specifications-fonctionnelles.md) - Exigences métier détaillées
+- [Spécifications Techniques](./documentation/specifications-techniques.md) - Architecture et choix techniques
+- [Plan d'Implémentation](./documentation/implementation-plan.md) - Guide pas-à-pas pour développeurs
 - [API Documentation (Swagger)](http://localhost:5000/api-docs) - Une fois l'API démarrée
-- [Collection Postman](./postman/management-waste-center.postman_collection.json)
+- [Collection Postman](./postman/) - Tests API complets
 
 ## 🔧 Scripts Disponibles
 
 ### API
 
-- `npm run dev` - Démarrage en mode développement
-- `npm run build` - Compilation TypeScript
+- `npm run dev` - Démarrage en mode développement avec hot reload
+- `npm run build` - Compilation TypeScript vers JavaScript
 - `npm start` - Démarrage en production
+- `npm run seed` - Peupler la base de données avec des données de test
 - `npm test` - Exécution des tests
 
 ### Frontend

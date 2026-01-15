@@ -1,7 +1,7 @@
 {
     "name": "management-waste-center-api",
     "version": "1.0.0",
-    "description": "API REST pour la gestion de centre de traitement des déchets",
+    "description": "API REST pour le système de suivi du niveau de remplissage des conteneurs",
     "main": "dist/server.js",
     "scripts": {
         "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
@@ -12,8 +12,10 @@
         "seed": "ts-node src/scripts/seed.ts"
     },
     "keywords": [
-        "waste",
-        "management",
+        "container",
+        "tracking",
+        "fill-level",
+        "recycling",
         "api"
     ],
     "author": "",
@@ -28,6 +30,8 @@
         "express-validator": "^7.0.1",
         "jsonwebtoken": "^9.0.2",
         "bcryptjs": "^2.4.3",
+        "ioredis": "^5.3.2",
+        "socket.io": "^4.6.1",
         "swagger-jsdoc": "^6.2.8",
         "swagger-ui-express": "^5.0.0"
     },

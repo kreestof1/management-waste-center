@@ -1,7 +1,8 @@
 {
-  "name": "management-waste-center-frontend",
+  "name": "container-tracking-frontend",
   "private": true,
   "version": "1.0.0",
+  "description": "Interface utilisateur pour le système de suivi du niveau de remplissage des conteneurs",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -18,7 +19,8 @@
     "axios": "^1.6.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.21.3"
+    "react-router-dom": "^6.21.3",
+    "socket.io-client": "^4.6.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.48",
