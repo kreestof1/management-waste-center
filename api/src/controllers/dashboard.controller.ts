@@ -20,8 +20,17 @@ export const getCenterStats = async (req: AuthRequest, res: Response) => {
         }
 
         // Check authorization (manager can only access their own centers)
-        if (req.user?.role === 'manager' && !req.user.centerIds?.includes(centerId)) {
-            return res.status(403).json({ message: 'Accès refusé à ce centre' });
+        if (req.user?.role === 'manager') {
+            const userCenterIds = req.user.centerIds?.map(id => id.toString()) || [];
+            console.log('Debug - Manager authorization check:');
+            console.log('  - Requested centerId:', centerId);
+            console.log('  - User centerIds (raw):', req.user.centerIds);
+            console.log('  - User centerIds (string):', userCenterIds);
+            console.log('  - Access allowed:', userCenterIds.includes(centerId));
+
+            if (!userCenterIds.includes(centerId)) {
+                return res.status(403).json({ message: 'Accès refusé à ce centre' });
+            }
         }
 
         // Get container counts by state
@@ -141,8 +150,17 @@ export const getAlerts = async (req: AuthRequest, res: Response) => {
         }
 
         // Check authorization
-        if (req.user?.role === 'manager' && !req.user.centerIds?.includes(centerId)) {
-            return res.status(403).json({ message: 'Accès refusé à ce centre' });
+        if (req.user?.role === 'manager') {
+            const userCenterIds = req.user.centerIds?.map(id => id.toString()) || [];
+            console.log('Debug - Manager authorization check (alerts):');
+            console.log('  - Requested centerId:', centerId);
+            console.log('  - User centerIds (raw):', req.user.centerIds);
+            console.log('  - User centerIds (string):', userCenterIds);
+            console.log('  - Access allowed:', userCenterIds.includes(centerId));
+
+            if (!userCenterIds.includes(centerId)) {
+                return res.status(403).json({ message: 'Accès refusé à ce centre' });
+            }
         }
 
         const thresholdDate = new Date();

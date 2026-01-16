@@ -7,6 +7,8 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ContainerList from './pages/ContainerList';
 import ContainerHistory from './pages/ContainerHistory';
+import ManagerDashboard from './pages/ManagerDashboard';
+import ManageTypes from './pages/ManageTypes';
 import NotFound from './pages/NotFound';
 import { useAuth } from './context/AuthContext';
 
@@ -54,6 +56,22 @@ function App() {
                                         element={
                                             <PrivateRoute>
                                                 <ContainerHistory />
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/manager"
+                                        element={
+                                            <PrivateRoute>
+                                                <ManagerDashboard />
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/manage-types"
+                                        element={
+                                            <PrivateRoute>
+                                                <ManageTypes />
                                             </PrivateRoute>
                                         }
                                     />

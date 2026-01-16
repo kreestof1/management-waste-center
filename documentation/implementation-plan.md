@@ -373,21 +373,8 @@ Each step includes specific tasks and validation tests to ensure correct impleme
 
 ---
 
-### Step 2.6: Implement Waste Controller - Update and Delete
+### Step 2.6: Implement Real-Time Updates with Socket.IO
 
-**Task**: Build controller functions for modifying and removing waste records.
-
-**Instructions**:
-
-1. Implement `updateWaste` function that:
-   - Extracts waste ID from URL parameters
-   - Extracts update data from request body
-   - Finds and updates the document
-   - Uses `{ new: true, runValidators: true }` options
-   - Returns HTTP 404 if not found, or HTTP 200 with updated document
-2. Implement `deleteWaste` function that:
-   - Extracts waste ID from URL parameters
-   - Finds and deletes thReal-Time Updates with Socket.IO
 **Task**: Add WebSocket support for real-time container status updates.
 
 **Instructions**:
@@ -814,6 +801,113 @@ Each step includes specific tasks and validation tests to ensure correct impleme
 
 ---
 
+### Step 3.5: Create Dashboard Page with Statistics Cards
+
+**Task**: Build the main dashboard showing key metrics.
+
+**Instructions**:
+
+1. Create `src/pages` directory
+2. Create `Dashboard.tsx` component
+3. Use Material-UI Grid to create a responsive layout
+4. Create three Paper cards displaying:
+   - Total wastes processed (with Recycling icon)
+   - Monthly evolution percentage (with TrendingUp icon)
+   - Collections today count (with LocalShipping icon)
+5. Use placeholder/mock data for now
+6. Style cards with padding and proper spacing
+
+**Validation Test**:
+
+- Navigate to `/` route
+- Verify three metric cards are displayed
+- Verify icons appear correctly
+- Verify cards are responsive (stack on mobile, row on desktop)
+- Resize browser window to test grid responsiveness
+- Verify text is readable and properly formatted
+
+---
+
+### Step 3.6: Implement Authentication System
+
+**Task**: Build authentication context, login, registration, and route protection.
+
+**Instructions**:
+
+1. Create `src/context` directory
+2. Create `AuthContext.tsx` with React Context for authentication:
+   - State: user (id, email, role, centerIds), token, isAuthenticated, loading
+   - Functions: login(email, password), register(email, password), logout()
+   - Store token in localStorage
+   - Auto-load user from token on app initialization
+   - Provide context to entire app via AuthProvider
+3. Create `src/pages/Login.tsx` component:
+   - Material-UI Card with centered login form
+   - Email and password TextField components
+   - Login button that calls authContext.login()
+   - Link to registration page
+   - Show error message if login fails (Snackbar or Alert)
+   - Redirect to dashboard on successful login
+4. Create `src/pages/Register.tsx` component:
+   - Similar form with email, password, confirm password fields
+   - Validate passwords match before submission
+   - Call authContext.register()
+   - Show success message and redirect to login page
+5. Create `src/components/PrivateRoute.tsx`:
+   - Wrapper component that checks authentication status
+   - Redirects to /login if user is not authenticated
+   - Shows loading spinner while checking auth status
+   - Renders children if authenticated
+6. Wrap App component with AuthProvider in `main.tsx`
+
+**Validation Test**:
+
+- Try accessing `/` without being logged in
+- Verify redirect to `/login` page
+- Register a new account with valid email and password
+- Verify success message appears
+- Login with registered credentials
+- Verify redirect to dashboard and user data is loaded
+- Verify token is stored in localStorage
+- Refresh page and verify user stays logged in
+- Logout and verify redirect to login page
+- Try login with wrong password and verify error message
+- Test "confirm password" validation in registration
+
+---
+
+### Step 3.7: Implement API Client Service
+
+**Task**: Create a service module for API communication.
+
+**Instructions**:
+
+1. Create `src/services` directory
+2. Create `api.ts` file
+3. Configure axios instance with base URL from environment variable
+4. Set default timeout to 10000ms
+5. Add request interceptor to attach JWT token to all requests
+6. Add response interceptor to handle 401 (redirect to login)
+7. Create API functions:
+   - **Auth**: `register()`, `login()`, `refreshToken()`, `logout()`
+   - **Centers**: `getCenters()`, `getCenterById()`, `createCenter()`, `updateCenter()`, `deleteCenter()`
+   - **Container Types**: `getContainerTypes()`, `createContainerType()`, `updateContainerType()`, `deleteContainerType()`
+   - **Containers**: `getContainersByCenter()`, `getContainerById()`, `createContainer()`, `updateContainer()`, `declareStatus()`, `getStatusHistory()`, `setMaintenance()`
+   - **Dashboard**: `getDashboardStats()`, `getAlerts()`, `getRotationMetrics()`, `getRecentActivity()`
+8. Export all functions from api.ts
+
+**Validation Test**:
+
+- Import a function in a test component
+- Call an API function and log the result
+- Verify the request is sent to correct URL (check browser Network tab)
+- If backend is running, verify actual data is returned
+- Test error handling by calling API with backend stopped
+- Verify promise rejects appropriately
+- Verify JWT token is attached to requests
+
+---
+
 ### Step 3.8: Create Container List with Status Display
 
 **Task**: Build container grid/list view with real-time status.
@@ -854,23 +948,11 @@ Each step includes specific tasks and validation tests to ensure correct impleme
 - Test status filter and verify only matching containers shown
 - Test search and verify fuzzy matching on labels
 - Verify maintenance containers show appropriate UI
-- Resize window and verify grid is responsive Swagger annotations
-
-1. Mount Swagger UI at `/api-docs` endpoint in server.ts
-2. Configure swagger to read annotations from route files
-
-**Validation Test**:
-
-- Navigate to `http://localhost:5000/api-docs` in a browser
-- Verify Swagger UI interface loads
-- Verify all endpoints are listed with proper HTTP methods
-- Verify each endpoint shows request/response schemas
-- Test an endpoint directly from Swagger UI
-- Verify the "Try it out" feature works correctly
+- Resize window and verify grid is responsive
 
 ---
 
-### Step 2.11:Implement Status Declaration with Confirmation
+### Step 3.9: Implement Status Declaration with Confirmation
 
 **Task**: Allow users to declare container status with validation.
 
@@ -895,7 +977,29 @@ Each step includes specific tasks and validation tests to ensure correct impleme
    - Show "updating" indicator
    - Revert if API call fails
 6. Add Material-UI Snackbar for notifications:
-   - Success: "Statut misReal-Time Updates with WebSocket
+   - Success: "Statut mis à jour avec succès"
+   - Error: Show specific error message
+   - Auto-hide after 4 seconds
+
+**Validation Test**:
+
+- Click "Déclarer Plein" on an empty container
+- Verify confirmation dialog appears with container details
+- Verify comment field is optional
+- Confirm declaration and verify success snackbar appears
+- Verify container badge updates to "PLEIN" immediately
+- Verify action button changes to "Déclarer Vide"
+- Try declaring same container again within 60 seconds
+- Verify throttle error message appears in snackbar
+- Wait 60 seconds and try again, verify it works
+- Set a container to maintenance mode
+- Try declaring status and verify maintenance error appears
+- Verify UI reverts if API call fails
+
+---
+
+### Step 3.10: Real-Time Updates with WebSocket
+
 **Task**: Connect to WebSocket and update UI in real-time.
 
 **Instructions**:
@@ -936,7 +1040,11 @@ Each step includes specific tasks and validation tests to ensure correct impleme
 - Disconnect network briefly
 - Verify connection indicator shows disconnected
 - Restore network and verify reconnection
-- Test with mulCreate Container History Timeline
+
+---
+
+### Step 3.11: Create Container History Timeline
+
 **Task**: Build timeline view showing status change history.
 
 **Instructions**:
@@ -961,7 +1069,21 @@ Each step includes specific tasks and validation tests to ensure correct impleme
 
 **Validation Test**:
 
-- Click on a3: Implement Geolocation and Nearest Center
+- Click on a container from the list
+- Verify navigation to history page works
+- Verify timeline shows all status events
+- Verify events are sorted chronologically (most recent first)
+- Verify user information is displayed
+- Verify relative timestamps are correct ("2 hours ago")
+- Test date filter and verify filtering works
+- Create a new status event from another window
+- Return to history and verify it appears at top
+- Test pagination if implemented
+
+---
+
+### Step 3.12: Implement Geolocation and Nearest Center
+
 **Task**: Add geolocation feature to find nearest recycling center.
 
 **Instructions**:
@@ -994,7 +1116,7 @@ Each step includes specific tasks and validation tests to ensure correct impleme
 
 ---
 
-### Step 3.14coBuild Manager Dashboard (Admin UI)
+### Step 3.13: Build Manager Dashboard (Admin UI)
 
 **Task**: Create comprehensive dashboard for managers.
 
@@ -1040,179 +1162,7 @@ Each step includes specific tasks and validation tests to ensure correct impleme
 - Create a container using the new type
 - Edit container details
 - Toggle maintenance mode and verify container updates
-- Try accessing as regular user and verify 403history
-- Verify navigation to history page
-- Verify timeline shows all status events
-- Verify events are sorted chronologically
-- Verify user information is displayed
-- Verify relative timestamps are correct
-- Test date filter and verify filtering works
-- Create a new status event
-- Return to history and verify it appears at top
-- Test pagination if implemented
-
-### Step 3.2: Create MUI Theme Configuration
-
-**Task**: Set up a custom Material-UI theme for the application.
-
-**Instructions**:
-
-1. Create a `src/theme.ts` file
-2. Import `createTheme` from Material-UI
-3. Define a theme object with:
-   - Primary color set to green (#2e7d32) for environmental/waste theme
-   - Secondary color set to orange (#ff9800)
-   - Light mode palette
-4. Export the theme as default
-5. Configure standard font family
-
-**Validation Test**:
-
-- Import the theme in a test component
-- Verify no TypeScript or import errors
-- Temporarily render a Material-UI Button with `color="primary"`
-- Verify the button displays in green color
-- Render a button with `color="secondary"` and verify orange color
-
----
-
-### Step 3.3: Create Layout Component with Navigation
-
-**Task**: Build a reusable layout with header navigation.
-
-**Instructions**:
-
-1. Create `src/components` directory
-2. Create `Layout.tsx` component
-3. Implement a Material-UI AppBar with Toolbar containing:
-   - App title "Management Waste Center"
-   - Delete/Recycling icon
-   - Navigation buttons for "Dashboard" and "Déchets" (Wastes)
-4. Use React Router's Link component for navigation
-5. Include a `children` prop to render page content
-6. Style with flexbox to ensure footer pushes to bottom
-
-**Validation Test**:
-
-- Wrap the Layout around a sample component
-- Verify the header appears at the top
-- Verify app title and icon are visible
-- Click navigation buttons and verify URL changes (even if pages don't exist yet)
-- Verify the layout is responsive (test on narrow screen)
-
----
-
-### Step 3.4: Set Up React Router
-
-**Task**: Configure routing for application pages.
-
-**Instructions**:
-
-1. Modify `src/App.tsx` to include Router setup
-2. Wrap application with BrowserRouter
-3. Wrap with ThemeProvider and pass custom theme
-4. Include CssBaseline for consistent styling
-5. Define Routes for:
-   - `/` → Dashboard page
-   - `/wastes` → Waste list page
-   - `*` → 404 Not Found page
-6. Wrap all routes within the Layout component
-
-**Validation Test**:
-
-- Start the application
-- Navigate to `/` and verify Dashboard loads (even if empty)
-- Navigate to `/wastes` and verify Waste list loads (even if empty)
-- Navigate to `/invalid-route` and verify 404 page appears
-- Use browser back/forward buttons to verify routing works
-- Verify Layout header appears on all pages
-
----
-
-### Step 3.5: Create Dashboard Page with Statistics Cards
-
-**Task**: Build the main dashboard showing key metrics.
-
-**Instructions**:
-
-1. Create `src/pages` directory
-2. Create `Dashboard.tsx` component
-3. Use Material-UI Grid to create a responsive layout
-4. Create three Paper cards displaying:
-   - Total wastes processed (with Recycling icon)
-   - Monthly evolution percentage (with TrendingUp icon)
-   - Collections today count (with LocalShipping icon)
-5. Use placeholder/mock data for now
-6. Style cards with padding and proper spacing
-
-**Validation Test**:
-
-- Navigate to `/` route
-- Verify three metric cards are displayed
-- Verify icons appear correctly
-- Verify cards are responsive (stack on mobile, row on desktop)
-- Resize browser window to test grid responsiveness
-- Verify text is readable and properly formatted
-
----
-
-### Step 3.6: Create Waste List Page Structure
-
-**Task**: Build the page for displaying and managing waste records.
-
-**Instructions**:
-
-1. Create `WasteList.tsx` in `src/pages`
-2. Add a page header with title "Gestion des Déchets"
-3. Add a button with Add icon labeled "Nouveau Déchet" (New Waste)
-4. Create a Material-UI Table with TableContainer and Paper
-5. Define table columns:
-   - Type (waste type)
-   - Poids (weight in kg)
-   - Date de Collecte (collection date)
-   - Statut (status)
-6. Show "Aucun déchet enregistré" message when table is empty
-
-**Validation Test**:
-
-- Navigate to `/wastes` route
-- Verify page title displays correctly
-- Verify "Nouveau Déchet" button appears
-- Verify table headers are visible
-- Verify empty state message appears
-- Verify table structure is properly formatted
-
----
-
-### Step 3.7: Implement API Client Service
-
-**Task**: Create a service module for API communication.
-
-**Instructions**:
-
-1. Create `src/services` directory
-2. Create `api.ts` file
-3. Configure axios instance with base URL from environment variable
-4. Set default timeout to 10000ms
-5. Add request interceptor to attach JWT token to all requests
-6. Add response interceptor to handle 401 (redirect to login)
-7. Create API functions:
-   - **Auth**: `register()`, `login()`, `refreshToken()`, `logout()`
-   - **Centers**: `getCenters()`, `getCenterById()`, `createCenter()`, `updateCenter()`, `deleteCenter()`
-   - **Container Types**: `getContainerTypes()`, `createContainerType()`, `updateContainerType()`, `deleteContainerType()`
-   - **Containers**: `getContainersByCenter()`, `getContainerById()`, `createContainer()`, `updateContainer()`, `declareStatus()`, `getStatusHistory()`, `setMaintenance()`
-   - **Dashboard**: `getDashboardStats()`, `getAlerts()`, `getRotationMetrics()`, `getRecentActivity()`
-8. Export all functions from api.ts
-
-**Validation Test**:
-
-- Import a function in a test component
-- Call an API function and log the result
-- Verify the request is sent to correct URL (check browser Network tab)
-- If backend is running, verify actual data is returned
-- Test error handling by calling API with backend stopped
-- Verify promise rejects appropriately
-- Verify JWT token is attached to requests
+- Try accessing as regular user and verify 403
 
 ---
 
@@ -1238,6 +1188,62 @@ Each step includes specific tasks and validation tests to ensure correct impleme
 - Click "Retour à l'accueil" button
 - Verify navigation returns to dashboard
 - Verify layout header is still present
+
+---
+
+### Step 3.15: Create Container Types Management Page
+
+**Task**: Build a dedicated page for managing container types with full CRUD operations.
+
+**Instructions**:
+
+1. Create `src/pages/ManageTypes.tsx` component
+2. Add route `/manage-types` for managers and superadmins only
+3. Implement main layout:
+   - Page header with "Manage Container Types" title
+   - "Add Type" button in top-right corner
+   - Data table showing all container types
+4. **Data Table Columns**:
+   - Type label (e.g., "Bois", "Gravats", "Carton")
+   - Icon preview (small icon display)
+   - Color preview (colored chip/circle)
+   - Container count (how many containers use this type)
+   - Created date
+   - Actions (Edit, Delete buttons)
+5. **Add/Edit Type Dialog**:
+   - Text field for type label (required, max 50 chars)
+   - Icon picker with predefined icons (Recycling, Delete, Build, etc.)
+   - Color picker for type identification
+   - Preview section showing how type will appear
+   - Save/Cancel buttons
+6. **Delete Confirmation**:
+   - Check if type is used by any containers
+   - Show warning dialog: "X containers use this type. Delete anyway?"
+   - If no containers use it, simple confirmation dialog
+   - Cascade delete or prevent deletion based on business rules
+7. **API Integration**:
+   - Fetch types on page load
+   - Create new type with validation
+   - Update existing type
+   - Delete type with usage check
+8. **Error Handling**:
+   - Show snackbar notifications for success/error
+   - Validate form fields before submission
+   - Handle API errors gracefully
+
+**Validation Test**:
+
+- Navigate to `/manage-types` as manager
+- Verify table shows all container types
+- Click "Add Type" and create new type with label, icon, color
+- Verify new type appears in table
+- Edit existing type and verify changes save
+- Try to delete type used by containers and verify warning
+- Delete unused type and verify confirmation dialog
+- Try to create type with duplicate label and verify error
+- Verify regular users cannot access this page (403/redirect)
+- Test form validation (empty label, invalid data)
+- Verify container count updates when containers are created/deleted
 
 ---
 

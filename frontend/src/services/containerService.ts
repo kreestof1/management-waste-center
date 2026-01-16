@@ -96,10 +96,11 @@ export const getContainerHistory = async (
     containerId: string,
     limit: number = 50
 ): Promise<StatusEvent[]> => {
-    const response = await api.get(`/containers/${containerId}/history`, {
+    const response = await api.get(`/containers/${containerId}/events`, {
         params: { limit },
     });
-    return response.data;
+    // Backend returns { events: [...], count: number }
+    return response.data.events || [];
 };
 
 // Dashboard stats (for managers)
@@ -120,4 +121,36 @@ export const getRotationMetrics = async (centerId: string, days: number = 30) =>
         params: { days },
     });
     return response.data;
+};
+
+// Container Types CRUD operations (manager/superadmin only)
+export const getAllContainerTypes = async (): Promise<ContainerType[]> => {
+    const response = await api.get('/container-types');
+    return response.data.types || [];
+};
+
+export const createContainerType = async (data: {
+    label: string;
+    icon?: string;
+    color?: string;
+}): Promise<ContainerType> => {
+    const response = await api.post('/container-types', data);
+    return response.data.type;
+};
+
+export const updateContainerType = async (
+    id: string,
+    data: { label?: string; icon?: string; color?: string }
+): Promise<ContainerType> => {
+    const response = await api.put(`/container-types/${id}`, data);
+    return response.data.type;
+};
+
+export const deleteContainerType = async (id: string): Promise<void> => {
+    await api.delete(`/container-types/${id}`);
+};
+
+export const getContainerCountByType = async (typeId: string): Promise<number> => {
+    const response = await api.get(`/container-types/count/${typeId}`);
+    return response.data.count || 0;
 };

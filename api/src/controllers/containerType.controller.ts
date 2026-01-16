@@ -21,6 +21,24 @@ export const getAllTypes = async (req: AuthRequest, res: Response) => {
   }
 }
 
+// Get container count by type
+export const getContainerCountByType = async (req: AuthRequest, res: Response) => {
+  try {
+    const { typeId } = req.params
+
+    const count = await Container.countDocuments({ typeId })
+
+    return res.status(200).json({
+      count,
+    })
+  } catch (error) {
+    console.error('Get container count by type error:', error)
+    return res.status(500).json({
+      message: 'Erreur lors de la récupération du nombre de conteneurs',
+    })
+  }
+}
+
 // Create new container type (manager/superadmin only)
 export const createType = async (req: AuthRequest, res: Response) => {
   try {
