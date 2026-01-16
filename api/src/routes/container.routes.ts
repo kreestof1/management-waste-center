@@ -4,6 +4,9 @@ import { authenticate, authorize } from '../middleware/auth.middleware'
 
 const router = express.Router()
 
+// Get all containers with filters (manager/superadmin only)
+router.get('/', authenticate, authorize('manager', 'superadmin'), containerController.getAllContainers)
+
 // Get containers by center
 router.get('/center/:centerId', authenticate, containerController.getContainersByCenter)
 
@@ -24,6 +27,10 @@ router.get('/:id/events', authenticate, containerController.getStatusHistory)
 
 // Set maintenance mode
 router.post('/:id/maintenance', authenticate, authorize('manager', 'superadmin'), containerController.setMaintenanceMode)
+
+// Bulk operations
+router.post('/bulk/maintenance', authenticate, authorize('manager', 'superadmin'), containerController.bulkSetMaintenance)
+router.post('/bulk/delete', authenticate, authorize('manager', 'superadmin'), containerController.bulkDeleteContainers)
 
 // Deactivate container
 router.delete('/:id', authenticate, authorize('manager', 'superadmin'), containerController.deactivateContainer)

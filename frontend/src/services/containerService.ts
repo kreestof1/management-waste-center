@@ -154,3 +154,79 @@ export const getContainerCountByType = async (typeId: string): Promise<number> =
     const response = await api.get(`/container-types/count/${typeId}`);
     return response.data.count || 0;
 };
+
+// Container CRUD operations (manager/superadmin only)
+export const getAllContainers = async (params?: {
+    search?: string;
+    centerId?: string;
+    typeId?: string;
+    state?: string;
+    page?: number;
+    limit?: number;
+}): Promise<{ containers: Container[]; total: number; count: number }> => {
+    const response = await api.get('/containers', { params });
+    return {
+        containers: response.data.containers || [],
+        total: response.data.total || 0,
+        count: response.data.count || 0,
+    };
+};
+
+export const createContainer = async (data: {
+    label: string;
+    centerId: string;
+    typeId: string;
+    capacityLiters?: number;
+    locationHint?: string;
+    state?: 'empty' | 'full';
+}): Promise<Container> => {
+    const response = await api.post('/containers', data);
+    return response.data.container;
+};
+
+export const updateContainer = async (
+    id: string,
+    data: {
+        label?: string;
+        centerId?: string;
+        typeId?: string;
+        capacityLiters?: number;
+        locationHint?: string;
+    }
+): Promise<Container> => {
+    const response = await api.put(`/containers/${id}`, data);
+    return response.data.container;
+};
+
+export const deleteContainer = async (id: string): Promise<void> => {
+    await api.delete(`/containers/${id}`);
+};
+
+export const setContainerMaintenance = async (
+    id: string,
+    maintenance: boolean
+): Promise<Container> => {
+    const response = await api.post(`/containers/${id}/maintenance`, { maintenance });
+    return response.data.container;
+};
+
+// Bulk operations
+export const bulkSetMaintenance = async (
+    containerIds: string[],
+    maintenance: boolean
+): Promise<{ success: number; failed: number }> => {
+    const response = await api.post('/containers/bulk/maintenance', {
+        containerIds,
+        maintenance,
+    });
+    return response.data;
+};
+
+export const bulkDeleteContainers = async (
+    containerIds: string[]
+): Promise<{ success: number; failed: number }> => {
+    const response = await api.post('/containers/bulk/delete', {
+        containerIds,
+    });
+    return response.data;
+};

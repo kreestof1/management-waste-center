@@ -103,6 +103,12 @@ export default function Layout({ children }: LayoutProps) {
             icon: <TypesIcon />,
             show: user?.role === 'manager' || user?.role === 'superadmin',
         },
+        {
+            label: 'Manage Containers',
+            path: '/manage-containers',
+            icon: <ContainersIcon />,
+            show: user?.role === 'manager' || user?.role === 'superadmin',
+        },
     ];
 
     const visibleItems = navigationItems.filter(item => item.show);

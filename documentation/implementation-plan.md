@@ -1247,6 +1247,91 @@ Each step includes specific tasks and validation tests to ensure correct impleme
 
 ---
 
+### Step 3.16: Build Container Management CRUD Operations
+
+**Task**: Implement comprehensive container management with full CRUD operations for managers.
+
+**Instructions**:
+
+1. Create `src/pages/ManageContainers.tsx` component
+2. Add route `/manage-containers` for managers and superadmins only
+3. Implement main layout:
+   - Page header with "Gestion des Conteneurs" title
+   - "Ajouter Conteneur" button in top-right corner
+   - Data table showing all containers with filters
+4. **Data Table Columns**:
+   - Container label (e.g., "Container-001")
+   - Type (with icon and color indicator)
+   - Center name
+   - Current state (Empty/Full/Maintenance) with color chips
+   - Capacity (liters)
+   - Location hint
+   - Last updated timestamp
+   - Actions (Edit, Delete, Toggle Maintenance buttons)
+5. **Filters and Search**:
+   - Search by container label
+   - Filter by center (dropdown)
+   - Filter by type (dropdown)
+   - Filter by state (All/Empty/Full/Maintenance)
+   - Clear filters button
+6. **Add/Edit Container Dialog**:
+   - Text field for container label (required, unique per center)
+   - Center selection dropdown (based on user's assigned centers)
+   - Container type selection dropdown
+   - Capacity input (number, optional, default based on type)
+   - Location hint text field (optional, max 100 chars)
+   - Initial state selection (Empty/Full, default Empty)
+   - Form validation with error messages
+   - Save/Cancel buttons
+7. **Delete Confirmation**:
+   - Show confirmation dialog with container details
+   - Warning about status history loss
+   - Option to archive instead of permanent delete
+   - Prevent deletion if container has recent activity (< 24h)
+8. **Maintenance Mode Toggle**:
+   - Quick toggle button in actions column
+   - Confirmation dialog for maintenance mode changes
+   - Visual indication of maintenance state
+   - Disable status changes when in maintenance
+9. **Bulk Operations**:
+   - Checkbox selection for multiple containers
+   - Bulk actions: Set Maintenance, Change Center, Delete
+   - Progress indicator for bulk operations
+   - Success/error summary after completion
+10. **API Integration**:
+    - Fetch containers with pagination and filters
+    - Create new container with validation
+    - Update existing container details
+    - Delete container with cascade options
+    - Toggle maintenance mode
+    - Real-time updates via WebSocket for state changes
+11. **Error Handling**:
+    - Show snackbar notifications for all operations
+    - Validate unique container labels per center
+    - Handle API errors gracefully with retry options
+    - Loading states for all async operations
+
+**Validation Test**:
+
+- Navigate to `/manage-containers` as manager
+- Verify table shows containers for manager's assigned centers
+- Test search functionality with partial container labels
+- Apply different filters and verify results
+- Click "Add Container" and create new container
+- Verify new container appears in table with correct details
+- Edit existing container and save changes
+- Toggle maintenance mode and verify state updates
+- Try to create container with duplicate label (same center)
+- Test bulk selection and bulk maintenance toggle
+- Delete container and verify confirmation dialog
+- Try to delete container with recent activity
+- Verify regular users cannot access page (403/redirect)
+- Test form validation (empty required fields, invalid capacity)
+- Verify real-time updates when container states change
+- Test pagination with large number of containers
+
+---
+
 ## Phase 4: Infrastructure and Deployment
 
 ### Step 4.1: Create Frontend Dockerfile
