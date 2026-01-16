@@ -222,7 +222,7 @@ const options: swaggerJsdoc.Options = {
             locationHint: {
               type: 'string',
               description: 'Location description',
-              example: 'Près de l'entrée principale',
+              example: "Près de l'entrée principale",
             },
             active: {
               type: 'boolean',

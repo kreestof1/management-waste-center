@@ -21,10 +21,10 @@ dotenv.config()
 const app = express()
 const httpServer = createServer(app)
 const io = new SocketIOServer(httpServer, {
-  cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-  },
+    cors: {
+        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        methods: ['GET', 'POST'],
+    },
 })
 
 const PORT = process.env.PORT || 5000
@@ -42,41 +42,41 @@ connectDB()
 
 // Socket.IO authentication middleware
 io.use((socket, next) => {
-  const token = socket.handshake.auth.token || socket.handshake.query.token
+    const token = socket.handshake.auth.token || socket.handshake.query.token
 
-  if (!token) {
-    return next(new Error('Authentication error: Token missing'))
-  }
+    if (!token) {
+        return next(new Error('Authentication error: Token missing'))
+    }
 
-  try {
-    const decoded = jwt.verify(token as string, JWT_SECRET) as any
-    socket.data.userId = decoded.userId
-    socket.data.role = decoded.role
-    next()
-  } catch (error) {
-    return next(new Error('Authentication error: Invalid token'))
-  }
+    try {
+        const decoded = jwt.verify(token as string, JWT_SECRET) as any
+        socket.data.userId = decoded.userId
+        socket.data.role = decoded.role
+        next()
+    } catch (error) {
+        return next(new Error('Authentication error: Invalid token'))
+    }
 })
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
-  console.log(`✅ WebSocket client connected: ${socket.id} (User: ${socket.data.userId})`)
+    console.log(`✅ WebSocket client connected: ${socket.id} (User: ${socket.data.userId})`)
 
-  // Join center room
-  socket.on('join:center', (centerId: string) => {
-    socket.join(`center:${centerId}`)
-    console.log(`User ${socket.data.userId} joined center ${centerId}`)
-  })
+    // Join center room
+    socket.on('join:center', (centerId: string) => {
+        socket.join(`center:${centerId}`)
+        console.log(`User ${socket.data.userId} joined center ${centerId}`)
+    })
 
-  // Leave center room
-  socket.on('leave:center', (centerId: string) => {
-    socket.leave(`center:${centerId}`)
-    console.log(`User ${socket.data.userId} left center ${centerId}`)
-  })
+    // Leave center room
+    socket.on('leave:center', (centerId: string) => {
+        socket.leave(`center:${centerId}`)
+        console.log(`User ${socket.data.userId} left center ${centerId}`)
+    })
 
-  socket.on('disconnect', () => {
-    console.log(`❌ WebSocket client disconnected: ${socket.id}`)
-  })
+    socket.on('disconnect', () => {
+        console.log(`❌ WebSocket client disconnected: ${socket.id}`)
+    })
 })
 
 // Make io available to controllers
@@ -86,8 +86,8 @@ console.log('✅ Socket.IO initialized')
 
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'Container Tracking API Documentation',
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Container Tracking API Documentation',
 }))
 
 // Routes
@@ -114,7 +114,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
  *                   example: API is running
  */
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Container Tracking API is running' })
+    res.json({ status: 'ok', message: 'Container Tracking API is running' })
 })
 
 app.use('/api/auth', authRoutes)
@@ -127,8 +127,8 @@ app.use('/api/dashboard', dashboardRoutes)
 app.use(errorHandler)
 
 httpServer.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`)
-  console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`)
+    console.log(`🚀 Server running on port ${PORT}`)
+    console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`)
 })
 
 export default app

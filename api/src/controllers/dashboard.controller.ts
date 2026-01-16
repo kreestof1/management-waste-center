@@ -1,4 +1,5 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthRequest } from '../middleware/auth.middleware';
 import Container from '../models/Container';
 import StatusEvent from '../models/StatusEvent';
 import RecyclingCenter from '../models/RecyclingCenter';
@@ -8,7 +9,7 @@ import RecyclingCenter from '../models/RecyclingCenter';
  * @route GET /api/dashboard/centers/:centerId/stats
  * @access Manager, Superadmin
  */
-export const getCenterStats = async (req: Request, res: Response) => {
+export const getCenterStats = async (req: AuthRequest, res: Response) => {
   try {
     const { centerId } = req.params;
 
@@ -128,7 +129,7 @@ export const getCenterStats = async (req: Request, res: Response) => {
  * @access Manager, Superadmin
  * @query alertThresholdHours - Hours before alerting on full container (default: 24)
  */
-export const getAlerts = async (req: Request, res: Response) => {
+export const getAlerts = async (req: AuthRequest, res: Response) => {
   try {
     const { centerId } = req.params;
     const alertThresholdHours = parseInt(req.query.alertThresholdHours as string) || 24;
@@ -179,8 +180,8 @@ export const getAlerts = async (req: Request, res: Response) => {
           hoursFull,
           declaredBy: lastFullEvent.authorId
             ? {
-                id: lastFullEvent.authorId._id,
-                name: `${lastFullEvent.authorId.firstName} ${lastFullEvent.authorId.lastName}`,
+                id: (lastFullEvent.authorId as any)._id,
+                name: `${(lastFullEvent.authorId as any).firstName} ${(lastFullEvent.authorId as any).lastName}`,
               }
             : null,
           severity:
@@ -218,7 +219,7 @@ export const getAlerts = async (req: Request, res: Response) => {
  * @access Manager, Superadmin
  * @query days - Number of days to analyze (default: 30)
  */
-export const getRotationMetrics = async (req: Request, res: Response) => {
+export const getRotationMetrics = async (req: AuthRequest, res: Response) => {
   try {
     const { centerId } = req.params;
     const days = parseInt(req.query.days as string) || 30;
@@ -270,8 +271,8 @@ export const getRotationMetrics = async (req: Request, res: Response) => {
 
         if (!containerMetrics[containerIdStr]) {
           containerMetrics[containerIdStr] = {
-            containerId: event.containerId._id,
-            containerLabel: event.containerId.label,
+            containerId: (event.containerId as any)._id,
+            containerLabel: (event.containerId as any).label,
             fillCount: 0,
             emptyCount: 0,
             avgFillTimeHours: 0,
