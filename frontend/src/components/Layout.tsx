@@ -20,9 +20,9 @@ import {
     useMediaQuery,
 } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { 
-    Recycling, 
-    AccountCircle, 
+import {
+    Recycling,
+    AccountCircle,
     FiberManualRecord,
     Menu as MenuIcon,
     Dashboard as DashboardIcon,
@@ -46,7 +46,7 @@ export default function Layout({ children }: LayoutProps) {
     const navigate = useNavigate();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-    
+
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -120,15 +120,15 @@ export default function Layout({ children }: LayoutProps) {
                         <>
                             {/* Desktop Navigation */}
                             {!isMobile && (
-                                <Box sx={{ display: 'flex', gap: 1 }}>  
+                                <Box sx={{ display: 'flex', gap: 1 }}>
                                     {visibleItems.map((item) => (
-                                        <Button 
+                                        <Button
                                             key={item.path}
-                                            color="inherit" 
-                                            component={RouterLink} 
+                                            color="inherit"
+                                            component={RouterLink}
                                             to={item.path}
                                             startIcon={item.icon}
-                                            sx={{ 
+                                            sx={{
                                                 minWidth: 'auto',
                                                 '& .MuiButton-startIcon': {
                                                     marginRight: { xs: 0, sm: '8px' }
@@ -234,7 +234,7 @@ export default function Layout({ children }: LayoutProps) {
                             <CloseIcon />
                         </IconButton>
                     </Box>
-                    
+
                     <Divider />
 
                     {/* User Info */}
@@ -258,7 +258,7 @@ export default function Layout({ children }: LayoutProps) {
                             </Box>
                         </Box>
                     )}
-                    
+
                     <Divider />
 
                     {/* Navigation Items */}
@@ -266,7 +266,7 @@ export default function Layout({ children }: LayoutProps) {
                         <List>
                             {visibleItems.map((item) => (
                                 <ListItem key={item.path} disablePadding>
-                                    <ListItemButton 
+                                    <ListItemButton
                                         onClick={() => handleNavigateAndClose(item.path)}
                                         sx={{
                                             py: 1.5,
@@ -279,7 +279,7 @@ export default function Layout({ children }: LayoutProps) {
                                         <ListItemIcon sx={{ minWidth: 48 }}>
                                             {item.icon}
                                         </ListItemIcon>
-                                        <ListItemText 
+                                        <ListItemText
                                             primary={item.label}
                                             primaryTypographyProps={{
                                                 fontWeight: 'medium'
@@ -290,14 +290,14 @@ export default function Layout({ children }: LayoutProps) {
                             ))}
                         </List>
                     )}
-                    
+
                     <Divider />
 
                     {/* Logout Button */}
                     {isAuthenticated && (
                         <List>
                             <ListItem disablePadding>
-                                <ListItemButton 
+                                <ListItemButton
                                     onClick={() => {
                                         handleLogout();
                                         handleMobileMenuClose();
@@ -314,7 +314,7 @@ export default function Layout({ children }: LayoutProps) {
                                     <ListItemIcon sx={{ minWidth: 48, color: 'inherit' }}>
                                         <AccountCircle />
                                     </ListItemIcon>
-                                    <ListItemText 
+                                    <ListItemText
                                         primary="Logout"
                                         primaryTypographyProps={{
                                             fontWeight: 'medium'

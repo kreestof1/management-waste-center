@@ -80,7 +80,7 @@ const ManagerDashboard: React.FC = () => {
     const [alerts, setAlerts] = useState<any[]>([]);
     const [error, setError] = useState('');
     const [centers, setCenters] = useState<any[]>([]);
-    
+
     // Get first center from user's centerIds or fallback to first available center
     const [centerId, setCenterId] = useState('');
 
@@ -123,7 +123,7 @@ const ManagerDashboard: React.FC = () => {
             try {
                 const centersData = await getCenters();
                 setCenters(centersData);
-                
+
                 // Determine centerId: prefer user's assigned center, otherwise use first available
                 let selectedCenterId = '';
                 if (user?.centerIds && user.centerIds.length > 0) {
@@ -149,7 +149,7 @@ const ManagerDashboard: React.FC = () => {
         try {
             setTypesLoading(true);
             const typesData = await getAllContainerTypes();
-            
+
             // Load container count for each type
             const typesWithCount = await Promise.all(
                 typesData.map(async (type: any) => {
@@ -161,7 +161,7 @@ const ManagerDashboard: React.FC = () => {
                     }
                 })
             );
-            
+
             setTypes(typesWithCount);
         } catch (error) {
             console.error('Failed to load container types:', error);
@@ -504,9 +504,9 @@ const ManagerDashboard: React.FC = () => {
                                 </TableHead>
                                 <TableBody>
                                     {alerts.map((alert: any) => (
-                                        <TableRow 
+                                        <TableRow
                                             key={alert.containerId}
-                                            sx={{ 
+                                            sx={{
                                                 bgcolor: alert.hoursFull > 12 ? 'error.light' : 'warning.light',
                                                 '&:hover': { bgcolor: alert.hoursFull > 12 ? 'error.main' : 'warning.main' }
                                             }}
@@ -548,8 +548,8 @@ const ManagerDashboard: React.FC = () => {
             {/* Tab 3: Manage Containers */}
             <TabPanel value={currentTab} index={2}>
                 <Box sx={{ mb: 2 }}>
-                    <Button 
-                        variant="contained" 
+                    <Button
+                        variant="contained"
                         startIcon={<CategoryIcon />}
                         onClick={() => navigate('/manage-types')}
                         size="large"
@@ -597,8 +597,8 @@ const ManagerDashboard: React.FC = () => {
                                 {types.map((type) => (
                                     <TableRow key={type._id} hover>
                                         <TableCell>
-                                            <Avatar 
-                                                sx={{ 
+                                            <Avatar
+                                                sx={{
                                                     bgcolor: type.color || '#4CAF50',
                                                     width: 32,
                                                     height: 32,

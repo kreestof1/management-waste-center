@@ -110,7 +110,7 @@ const ManageTypes: React.FC = () => {
         try {
             setLoading(true);
             const typesData = await getAllContainerTypes();
-            
+
             // Load container count for each type
             const typesWithCount = await Promise.all(
                 typesData.map(async (type) => {
@@ -123,7 +123,7 @@ const ManageTypes: React.FC = () => {
                     }
                 })
             );
-            
+
             setTypes(typesWithCount);
         } catch (error) {
             console.error('Failed to load container types:', error);
@@ -302,8 +302,8 @@ const ManageTypes: React.FC = () => {
                         {types.map((type) => (
                             <TableRow key={type._id} hover>
                                 <TableCell>
-                                    <Avatar 
-                                        sx={{ 
+                                    <Avatar
+                                        sx={{
                                             bgcolor: type.color || '#4CAF50',
                                             width: 32,
                                             height: 32,
