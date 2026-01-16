@@ -9,9 +9,11 @@ export interface RecyclingCenter {
         lng: number;
     };
     phone?: string;
-    openingHours?: Record<string, string>;
+    openingHours?: Record<string, { open: string; close: string; closed: boolean }>;
     publicVisibility: boolean;
     active: boolean;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface ContainerType {
@@ -53,12 +55,42 @@ export interface StatusEvent {
 // Recycling Centers
 export const getCenters = async (): Promise<RecyclingCenter[]> => {
     const response = await api.get('/centers');
-    return response.data;
+    return response.data.centers || response.data;
 };
 
 export const getCenterById = async (id: string): Promise<RecyclingCenter> => {
     const response = await api.get(`/centers/${id}`);
-    return response.data;
+    return response.data.center || response.data;
+};
+
+export const createCenter = async (data: {
+    name: string;
+    address: string;
+    geo: { lat: number; lng: number };
+    publicVisibility?: boolean;
+    openingHours?: Array<{ day: string; open: string; close: string }>;
+}): Promise<RecyclingCenter> => {
+    const response = await api.post('/centers', data);
+    return response.data.center;
+};
+
+export const updateCenter = async (
+    id: string,
+    data: {
+        name?: string;
+        address?: string;
+        geo?: { lat: number; lng: number };
+        publicVisibility?: boolean;
+        openingHours?: Array<{ day: string; open: string; close: string }>;
+        active?: boolean;
+    }
+): Promise<RecyclingCenter> => {
+    const response = await api.put(`/centers/${id}`, data);
+    return response.data.center;
+};
+
+export const deleteCenter = async (id: string): Promise<void> => {
+    await api.delete(`/centers/${id}`);
 };
 
 // Container Types

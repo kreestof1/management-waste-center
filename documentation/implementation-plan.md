@@ -199,34 +199,72 @@ Each step includes specific tasks and validation tests to ensure correct impleme
 - Verify all documents save successfully to the database
 - Test required field validation (missing fields should fail)
 - Test enum validation (invalid values should fail)
-- Verify references use Recycling Center Management
-**Task**: Build CRUD operations for recycling centers (manager only).
+- Verify references use valid ObjectIds
+
+---
+
+### Step 2.4: Implement Recycling Center Management
+
+**Task**: Build CRUD operations for recycling centers (manager/superadmin only).
 
 **Instructions**:
 
 1. Create `src/controllers/center.controller.ts` file
 2. Implement `getAllCenters` function that:
-   - Queries all recycling centers
+   - Queries all recycling centers with active=true
    - If user role is visitor/user, filter by publicVisibility=true
-   - If user has centerIds, filter to only their assigned centers
+   - If user has centerIds (manager), filter to only their assigned centers
    - Returns HTTP 200 with array of centers
 3. Implement `getCenterById` function that:
    - Extracts center ID from URL parameters
-   - Checks user has access to this center
-   - Finds center by ID
-   - Populates related data if needed
+   - Checks user has access to this center (manager must be assigned)
+   - Finds center by ID and active=true
    - Returns HTTP 404 if not found, or HTTP 200 with center
 4. Implement `createCenter` function (manager/superadmin only) that:
-   - Validates center data from request body
-   - Creates new RecyclingCenter document
-   - Creates audit log entry
+   - Validates center data from request body (name, address, geo coordinates)
+   - Validates required fields: name, address, geo.lat, geo.lng
+   - Creates new RecyclingCenter document with active=true, publicVisibility=true
+   - Creates audit log entry with action "CENTER_CREATED"
    - Returns HTTP 201 with created center
 5. Implement `updateCenter` function (manager/superadmin only) that:
-   - Extracts center ID and update data
-   - Validates user manages this center
-   - Updates center document
-   - Creates audit log eContainer Type Management
-**Task**: Build CRUD operations for container types (manager only).
+   - Extracts center ID and update data from request
+   - Validates user manages this center (centerIds includes this center)
+   - Updates center document with new data
+   - Creates audit log entry with action "CENTER_UPDATED"
+   - Returns HTTP 200 with updated center
+6. Implement `deleteCenter` function (superadmin only) that:
+   - Extracts center ID from URL parameters
+   - Checks if center has any active containers
+   - If containers exist, return 409 conflict with message
+   - If no containers, set active=false (soft delete)
+   - Creates audit log entry with action "CENTER_DELETED"
+   - Returns HTTP 200 with success message
+7. Create routes file `src/routes/center.routes.ts`:
+   - GET `/` → getAllCenters (authenticated)
+   - GET `/:id` → getCenterById (authenticated)
+   - POST `/` → createCenter (manager, superadmin)
+   - PUT `/:id` → updateCenter (manager, superadmin)
+   - DELETE `/:id` → deleteCenter (superadmin)
+8. Mount routes in server at `/api/centers`
+
+**Validation Test**:
+
+- GET all centers and verify public centers are visible to regular users
+- Login as manager and verify only assigned centers are returned
+- GET center by ID and verify access control works
+- Create a new center with valid data and verify 201 response
+- Try creating center with missing required fields and verify 400
+- Update center details and verify changes persist
+- Try updating center as manager not assigned to it and verify 403
+- Try deleting center with containers and verify 409 conflict
+- Delete center without containers and verify soft delete (active=false)
+- Verify audit logs are created for all operations
+
+---
+
+### Step 2.5: Implement Container Type Management
+
+**Task**: Build CRUD operations for container types (manager/superadmin only).
 
 **Instructions**:
 
@@ -1329,6 +1367,95 @@ Each step includes specific tasks and validation tests to ensure correct impleme
 - Test form validation (empty required fields, invalid capacity)
 - Verify real-time updates when container states change
 - Test pagination with large number of containers
+
+---
+
+### Step 3.17: Create Recycling Centers Management Page
+
+**Task**: Build a dedicated page for managing recycling centers with full CRUD operations for superadmins.
+
+**Instructions**:
+
+1. Create `src/pages/ManageCenters.tsx` component
+2. Add route `/manage-centers` for superadmins only
+3. Implement main layout:
+   - Page header with "Gestion des Centres de Recyclage" title
+   - "Ajouter Centre" button in top-right corner
+   - Data table showing all recycling centers with filters
+4. **Data Table Columns**:
+   - Center name (e.g., "Déchetterie de Lyon Nord")
+   - Address (full address)
+   - Status badge (Active/Inactive) with color indicators
+   - Public visibility indicator (Public/Private)
+   - Coordinates (lat, lng) with map icon link
+   - Number of containers assigned
+   - Created date
+   - Actions (Edit, Delete, Toggle Active Status buttons)
+5. **Filters and Search**:
+   - Search by center name or address
+   - Filter by status (All/Active/Inactive)
+   - Filter by visibility (All/Public/Private)
+   - Clear filters button
+6. **Add/Edit Center Dialog**:
+   - Text field for center name (required, max 100 chars)
+   - Text area for full address (required, max 255 chars)
+   - Coordinate inputs for latitude and longitude (required, with validation)
+   - Map integration for selecting coordinates (optional enhancement)
+   - Public visibility toggle switch
+   - Opening hours configuration (days of week with open/close times)
+   - Active status toggle (for edit mode)
+   - Form validation with error messages
+   - Save/Cancel buttons
+7. **Delete Confirmation**:
+   - Show confirmation dialog with center details
+   - Warning about assigned containers and users
+   - Check if center has active containers or assigned managers
+   - Prevent deletion if dependencies exist, offer soft delete (set active=false)
+   - Show impact summary (X containers, Y managers affected)
+8. **Coordinate Validation**:
+   - Latitude validation: -90 to +90 degrees
+   - Longitude validation: -180 to +180 degrees
+   - Optional: Reverse geocoding to validate address matches coordinates
+   - Visual feedback for invalid coordinates
+9. **Opening Hours Management**:
+   - Day selector with time pickers for open/close times
+   - Support for "Closed" days
+   - Validation for logical time ranges (open < close)
+   - Multiple time slots per day support (morning/afternoon)
+10. **API Integration**:
+    - Fetch centers with pagination and filters
+    - Create new center with coordinate and address validation
+    - Update existing center details
+    - Soft delete center (set active=false) with dependency checks
+    - Toggle active status with audit logging
+11. **Error Handling**:
+    - Show snackbar notifications for all operations
+    - Validate unique center names
+    - Handle API errors gracefully with retry options
+    - Loading states for all async operations
+    - Geographic validation errors (invalid coordinates)
+
+**Validation Test**:
+
+- Navigate to `/manage-centers` as superadmin
+- Verify only superadmins can access this page (403 for others)
+- Verify table shows all recycling centers with correct data
+- Test search functionality with center names and addresses
+- Apply different filters and verify results work correctly
+- Click "Add Center" and create new center with valid data
+- Verify coordinate validation works (reject invalid lat/lng)
+- Test address validation and required field enforcement
+- Verify new center appears in table with correct details
+- Edit existing center and save changes
+- Test opening hours configuration with multiple time slots
+- Toggle active status and verify state updates
+- Try to create center with duplicate name and verify error
+- Test delete confirmation for centers with/without containers
+- Verify soft delete functionality (active=false)
+- Verify managers and regular users cannot access page
+- Test form validation (empty required fields, invalid coordinates)
+- Verify API error handling and user feedback
+- Test bulk operations if implemented
 
 ---
 

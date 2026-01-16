@@ -10,6 +10,7 @@ import ContainerHistory from './pages/ContainerHistory';
 import ManagerDashboard from './pages/ManagerDashboard';
 import ManageTypes from './pages/ManageTypes';
 import ManageContainers from './pages/ManageContainers';
+import ManageCenters from './pages/ManageCenters';
 import NotFound from './pages/NotFound';
 import { useAuth } from './context/AuthContext';
 
@@ -81,6 +82,14 @@ function App() {
                                         element={
                                             <PrivateRoute>
                                                 <ManageContainers />
+                                            </PrivateRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/manage-centers"
+                                        element={
+                                            <PrivateRoute>
+                                                <ManageCenters />
                                             </PrivateRoute>
                                         }
                                     />
