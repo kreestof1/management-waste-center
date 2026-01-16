@@ -1,224 +1,313 @@
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
-import Waste from '../models/Waste'
+import bcrypt from 'bcryptjs'
+import User from '../models/User'
+import RecyclingCenter from '../models/RecyclingCenter'
+import ContainerType from '../models/ContainerType'
+import Container from '../models/Container'
+import StatusEvent from '../models/StatusEvent'
 
 dotenv.config()
 
-const sampleWastes = [
-    {
-        type: 'plastic',
-        weight: 25.5,
-        collectionDate: new Date('2026-01-10T08:30:00Z'),
-        status: 'collected',
-        description: 'Bouteilles plastiques PET collectées',
-        location: 'Zone A - Conteneur 3',
-    },
-    {
-        type: 'glass',
-        weight: 45.2,
-        collectionDate: new Date('2026-01-12T10:15:00Z'),
-        status: 'processing',
-        description: 'Bouteilles en verre mixtes',
-        location: 'Zone B - Conteneur 1',
-    },
-    {
-        type: 'paper',
-        weight: 67.8,
-        collectionDate: new Date('2026-01-11T14:20:00Z'),
-        status: 'processed',
-        description: 'Cartons et papiers recyclables',
-        location: 'Zone A - Conteneur 5',
-    },
-    {
-        type: 'metal',
-        weight: 123.4,
-        collectionDate: new Date('2026-01-09T09:00:00Z'),
-        status: 'recycled',
-        description: 'Canettes aluminium et boîtes métalliques',
-        location: 'Zone C - Conteneur 2',
-    },
-    {
-        type: 'organic',
-        weight: 89.6,
-        collectionDate: new Date('2026-01-13T11:45:00Z'),
-        status: 'processing',
-        description: 'Déchets organiques compostables',
-        location: 'Zone D - Composteur 1',
-    },
-    {
-        type: 'electronic',
-        weight: 34.2,
-        collectionDate: new Date('2026-01-08T15:30:00Z'),
-        status: 'collected',
-        description: 'Équipements électroniques usagés',
-        location: 'Zone E - Stockage sécurisé',
-    },
-    {
-        type: 'plastic',
-        weight: 18.9,
-        collectionDate: new Date('2026-01-14T07:00:00Z'),
-        status: 'collected',
-        description: 'Emballages plastiques divers',
-        location: 'Zone A - Conteneur 4',
-    },
-    {
-        type: 'glass',
-        weight: 52.1,
-        collectionDate: new Date('2026-01-07T13:20:00Z'),
-        status: 'recycled',
-        description: 'Verre blanc trié',
-        location: 'Zone B - Conteneur 2',
-    },
-    {
-        type: 'paper',
-        weight: 43.7,
-        collectionDate: new Date('2026-01-15T08:45:00Z'),
-        status: 'collected',
-        description: 'Journaux et magazines',
-        location: 'Zone A - Conteneur 6',
-    },
-    {
-        type: 'metal',
-        weight: 76.5,
-        collectionDate: new Date('2026-01-06T16:00:00Z'),
-        status: 'processed',
-        description: 'Ferraille métallique triée',
-        location: 'Zone C - Conteneur 1',
-    },
-    {
-        type: 'hazardous',
-        weight: 12.3,
-        collectionDate: new Date('2026-01-05T10:30:00Z'),
-        status: 'processing',
-        description: 'Piles et batteries usagées',
-        location: 'Zone F - Stockage dangereux',
-    },
-    {
-        type: 'organic',
-        weight: 102.8,
-        collectionDate: new Date('2026-01-14T12:00:00Z'),
-        status: 'processing',
-        description: 'Déchets verts du jardin',
-        location: 'Zone D - Composteur 2',
-    },
-    {
-        type: 'plastic',
-        weight: 31.4,
-        collectionDate: new Date('2026-01-13T09:15:00Z'),
-        status: 'processed',
-        description: 'Films plastiques agricoles',
-        location: 'Zone A - Conteneur 7',
-    },
-    {
-        type: 'electronic',
-        weight: 28.6,
-        collectionDate: new Date('2026-01-12T14:50:00Z'),
-        status: 'processing',
-        description: 'Téléphones et tablettes obsolètes',
-        location: 'Zone E - Stockage sécurisé',
-    },
-    {
-        type: 'other',
-        weight: 15.7,
-        collectionDate: new Date('2026-01-11T11:20:00Z'),
-        status: 'collected',
-        description: 'Déchets mixtes non triés',
-        location: 'Zone G - Conteneur général',
-    },
-    {
-        type: 'glass',
-        weight: 38.9,
-        collectionDate: new Date('2026-01-10T15:40:00Z'),
-        status: 'processing',
-        description: 'Bocaux en verre',
-        location: 'Zone B - Conteneur 3',
-    },
-    {
-        type: 'paper',
-        weight: 55.2,
-        collectionDate: new Date('2026-01-09T08:10:00Z'),
-        status: 'recycled',
-        description: 'Cartons ondulés',
-        location: 'Zone A - Conteneur 8',
-    },
-    {
-        type: 'metal',
-        weight: 91.3,
-        collectionDate: new Date('2026-01-15T10:00:00Z'),
-        status: 'collected',
-        description: 'Conserves métalliques',
-        location: 'Zone C - Conteneur 3',
-    },
-    {
-        type: 'organic',
-        weight: 78.4,
-        collectionDate: new Date('2026-01-08T13:30:00Z'),
-        status: 'recycled',
-        description: 'Compost mature',
-        location: 'Zone D - Composteur 3',
-    },
-    {
-        type: 'plastic',
-        weight: 22.1,
-        collectionDate: new Date('2026-01-07T09:50:00Z'),
-        status: 'recycled',
-        description: 'Bouchons plastiques collectés',
-        location: 'Zone A - Conteneur 9',
-    },
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/container-tracking'
+
+// Sample data
+const containerTypes = [
+  {
+    label: 'Bois',
+    icon: 'Carpenter',
+    color: '#8B4513',
+  },
+  {
+    label: 'Gravats',
+    icon: 'Construction',
+    color: '#808080',
+  },
+  {
+    label: 'Carton',
+    icon: 'Inventory',
+    color: '#CD853F',
+  },
+  {
+    label: 'DEEE',
+    icon: 'DevicesOther',
+    color: '#4169E1',
+  },
+  {
+    label: 'Verre',
+    icon: 'LocalBar',
+    color: '#00CED1',
+  },
 ]
 
-const seedDatabase = async () => {
-    try {
-        const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/waste-management'
+const recyclingCenters = [
+  {
+    name: 'Déchetterie de Lyon Nord',
+    address: '123 Rue de la République, 69001 Lyon',
+    geo: {
+      lat: 45.7640,
+      lng: 4.8357,
+    },
+    phone: '+33 4 12 34 56 78',
+    openingHours: {
+      monday: '08:00-12:00, 14:00-18:00',
+      tuesday: '08:00-12:00, 14:00-18:00',
+      wednesday: '08:00-12:00, 14:00-18:00',
+      thursday: '08:00-12:00, 14:00-18:00',
+      friday: '08:00-12:00, 14:00-18:00',
+      saturday: '09:00-17:00',
+      sunday: 'Fermé',
+    },
+    active: true,
+  },
+  {
+    name: 'Déchetterie de Villeurbanne',
+    address: '456 Avenue Général de Gaulle, 69100 Villeurbanne',
+    geo: {
+      lat: 45.7719,
+      lng: 4.8808,
+    },
+    phone: '+33 4 12 34 56 79',
+    openingHours: {
+      monday: '08:30-12:30, 14:00-18:30',
+      tuesday: '08:30-12:30, 14:00-18:30',
+      wednesday: '08:30-12:30, 14:00-18:30',
+      thursday: '08:30-12:30, 14:00-18:30',
+      friday: '08:30-12:30, 14:00-18:30',
+      saturday: '09:00-18:00',
+      sunday: 'Fermé',
+    },
+    active: true,
+  },
+  {
+    name: 'Déchetterie de Caluire',
+    address: '789 Montée de la Boucle, 69300 Caluire-et-Cuire',
+    geo: {
+      lat: 45.7956,
+      lng: 4.8506,
+    },
+    phone: '+33 4 12 34 56 80',
+    openingHours: {
+      monday: '08:00-18:00',
+      tuesday: '08:00-18:00',
+      wednesday: '08:00-18:00',
+      thursday: '08:00-18:00',
+      friday: '08:00-18:00',
+      saturday: '08:00-18:00',
+      sunday: '10:00-16:00',
+    },
+    active: true,
+  },
+]
 
-        console.log('🔌 Connexion à MongoDB...')
-        await mongoose.connect(mongoUri)
-        console.log('✅ Connecté à MongoDB')
+async function seed() {
+  try {
+    // Connect to MongoDB
+    await mongoose.connect(MONGODB_URI)
+    console.log('✅ Connected to MongoDB')
 
-        // Clear existing data
-        console.log('🗑️  Suppression des données existantes...')
-        await Waste.deleteMany({})
-        console.log('✅ Données existantes supprimées')
+    // Clear existing data
+    console.log('🗑️  Clearing existing data...')
+    await User.deleteMany({})
+    await RecyclingCenter.deleteMany({})
+    await ContainerType.deleteMany({})
+    await Container.deleteMany({})
+    await StatusEvent.deleteMany({})
+    console.log('✅ Existing data cleared')
 
-        // Insert sample data
-        console.log('📝 Insertion des données de démonstration...')
-        const insertedWastes = await Waste.insertMany(sampleWastes)
-        console.log(`✅ ${insertedWastes.length} déchets insérés avec succès`)
+    // Create container types
+    console.log('📦 Creating container types...')
+    const createdTypes = await ContainerType.insertMany(containerTypes)
+    console.log(`✅ Created ${createdTypes.length} container types`)
 
-        // Display statistics
-        const stats = await Waste.aggregate([
-            {
-                $group: {
-                    _id: '$type',
-                    count: { $sum: 1 },
-                    totalWeight: { $sum: '$weight' },
-                },
-            },
-        ])
+    // Create recycling centers
+    console.log('🏢 Creating recycling centers...')
+    const createdCenters = await RecyclingCenter.insertMany(recyclingCenters)
+    console.log(`✅ Created ${createdCenters.length} recycling centers`)
 
-        console.log('\n📊 Statistiques:')
-        console.log('─────────────────────────────────────')
-        stats.forEach((stat) => {
-            console.log(`   ${stat._id.padEnd(12)}: ${stat.count} items (${stat.totalWeight.toFixed(1)} kg)`)
-        })
-        console.log('─────────────────────────────────────')
+    // Create users with different roles
+    console.log('👥 Creating users...')
+    const hashedPassword = await bcrypt.hash('password123', 10)
 
-        const totalWeight = stats.reduce((sum, stat) => sum + stat.totalWeight, 0)
-        console.log(`   Total: ${insertedWastes.length} déchets (${totalWeight.toFixed(1)} kg)`)
+    const users = [
+      {
+        email: 'admin@container-tracking.com',
+        passwordHash: hashedPassword,
+        firstName: 'Super',
+        lastName: 'Admin',
+        role: 'superadmin',
+        centerIds: [],
+      },
+      {
+        email: 'manager1@container-tracking.com',
+        passwordHash: hashedPassword,
+        firstName: 'Marie',
+        lastName: 'Dupont',
+        role: 'manager',
+        centerIds: [createdCenters[0]._id],
+      },
+      {
+        email: 'manager2@container-tracking.com',
+        passwordHash: hashedPassword,
+        firstName: 'Pierre',
+        lastName: 'Martin',
+        role: 'manager',
+        centerIds: [createdCenters[1]._id, createdCenters[2]._id],
+      },
+      {
+        email: 'agent1@container-tracking.com',
+        passwordHash: hashedPassword,
+        firstName: 'Sophie',
+        lastName: 'Bernard',
+        role: 'agent',
+        centerIds: [createdCenters[0]._id],
+      },
+      {
+        email: 'agent2@container-tracking.com',
+        passwordHash: hashedPassword,
+        firstName: 'Luc',
+        lastName: 'Moreau',
+        role: 'agent',
+        centerIds: [createdCenters[1]._id],
+      },
+      {
+        email: 'user1@example.com',
+        passwordHash: hashedPassword,
+        firstName: 'Jean',
+        lastName: 'Petit',
+        role: 'user',
+        centerIds: [],
+      },
+      {
+        email: 'user2@example.com',
+        passwordHash: hashedPassword,
+        firstName: 'Claire',
+        lastName: 'Dubois',
+        role: 'user',
+        centerIds: [],
+      },
+    ]
 
-        console.log('\n✨ Base de données peuplée avec succès!')
-        console.log('🌐 Vous pouvez maintenant accéder à:')
-        console.log('   - API: http://localhost:5000/api/wastes')
-        console.log('   - Swagger: http://localhost:5000/api-docs')
-        console.log('   - Frontend: http://localhost:3000/wastes')
+    const createdUsers = await User.insertMany(users)
+    console.log(`✅ Created ${createdUsers.length} users`)
 
-    } catch (error) {
-        console.error('❌ Erreur lors du seeding:', error)
-        process.exit(1)
-    } finally {
-        await mongoose.connection.close()
-        console.log('\n🔌 Connexion MongoDB fermée')
+    // Create containers
+    console.log('🗑️  Creating containers...')
+    const containers: any[] = []
+
+    // Lyon Nord - 7 containers
+    for (let i = 0; i < 7; i++) {
+      const typeIndex = i % createdTypes.length
+      containers.push({
+        centerId: createdCenters[0]._id,
+        typeId: createdTypes[typeIndex]._id,
+        label: `${createdTypes[typeIndex].label}-A${i + 1}`,
+        state: i % 3 === 0 ? 'full' : i % 3 === 1 ? 'empty' : 'maintenance',
+        capacityLiters: 1000,
+        locationHint: `Zone A - Emplacement ${i + 1}`,
+        active: true,
+      })
     }
+
+    // Villeurbanne - 8 containers
+    for (let i = 0; i < 8; i++) {
+      const typeIndex = i % createdTypes.length
+      containers.push({
+        centerId: createdCenters[1]._id,
+        typeId: createdTypes[typeIndex]._id,
+        label: `${createdTypes[typeIndex].label}-B${i + 1}`,
+        state: i % 4 === 0 ? 'full' : i % 4 === 1 ? 'empty' : i % 4 === 2 ? 'full' : 'empty',
+        capacityLiters: 1000,
+        locationHint: `Zone B - Emplacement ${i + 1}`,
+        active: true,
+      })
+    }
+
+    // Caluire - 5 containers
+    for (let i = 0; i < 5; i++) {
+      const typeIndex = i % createdTypes.length
+      containers.push({
+        centerId: createdCenters[2]._id,
+        typeId: createdTypes[typeIndex]._id,
+        label: `${createdTypes[typeIndex].label}-C${i + 1}`,
+        state: i % 2 === 0 ? 'empty' : 'full',
+        capacityLiters: 1000,
+        locationHint: `Zone C - Emplacement ${i + 1}`,
+        active: true,
+      })
+    }
+
+    const createdContainers = await Container.insertMany(containers)
+    console.log(`✅ Created ${createdContainers.length} containers`)
+
+    // Create status events
+    console.log('📝 Creating status events...')
+    const statusEvents: any[] = []
+    const now = new Date()
+
+    // Generate events for the last 30 days
+    for (const container of createdContainers) {
+      const numEvents = Math.floor(Math.random() * 5) + 2 // 2-6 events per container
+      let currentDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) // 30 days ago
+      let currentState: 'empty' | 'full' = 'empty'
+
+      for (let i = 0; i < numEvents; i++) {
+        // Random time between events (1-7 days)
+        const daysBetween = Math.floor(Math.random() * 7) + 1
+        currentDate = new Date(currentDate.getTime() + daysBetween * 24 * 60 * 60 * 1000)
+
+        if (currentDate > now) break
+
+        // Alternate between empty and full
+        currentState = currentState === 'empty' ? 'full' : 'empty'
+
+        // Random user (preferring agents and managers)
+        const userIndex = Math.floor(Math.random() * 10) < 7 
+          ? Math.floor(Math.random() * 5) // Agents and managers (70%)
+          : 5 + Math.floor(Math.random() * 2) // Regular users (30%)
+
+        // Map user role to valid source
+        const user = createdUsers[userIndex]
+        let source: 'user' | 'agent' | 'manager' | 'sensor' | 'import' = 'user'
+        if (user.role === 'agent') source = 'agent'
+        else if (user.role === 'manager' || user.role === 'superadmin') source = 'manager'
+
+        statusEvents.push({
+          containerId: container._id,
+          newState: currentState,
+          authorId: user._id,
+          source,
+          comment: currentState === 'full' 
+            ? `Conteneur rempli à ${Math.floor(Math.random() * 20 + 80)}%`
+            : 'Conteneur vidé',
+          confidence: 0.9 + Math.random() * 0.1, // 0.9-1.0
+          createdAt: currentDate,
+        })
+      }
+    }
+
+    const createdEvents = await StatusEvent.insertMany(statusEvents)
+    console.log(`✅ Created ${createdEvents.length} status events`)
+
+    console.log('\n✅ Seeding completed successfully!')
+    console.log('\n📋 Summary:')
+    console.log(`  - ${createdTypes.length} container types`)
+    console.log(`  - ${createdCenters.length} recycling centers`)
+    console.log(`  - ${createdUsers.length} users (roles: superadmin, manager, agent, user)`)
+    console.log(`  - ${createdContainers.length} containers`)
+    console.log(`  - ${createdEvents.length} status events`)
+    console.log('\n🔑 Test credentials:')
+    console.log('  Email: admin@container-tracking.com | Password: password123 (superadmin)')
+    console.log('  Email: manager1@container-tracking.com | Password: password123 (manager)')
+    console.log('  Email: agent1@container-tracking.com | Password: password123 (agent)')
+    console.log('  Email: user1@example.com | Password: password123 (user)')
+
+    process.exit(0)
+  } catch (error) {
+    console.error('❌ Seeding failed:', error)
+    process.exit(1)
+  }
 }
 
-seedDatabase()
+seed()
+

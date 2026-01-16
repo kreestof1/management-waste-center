@@ -13,6 +13,7 @@ import authRoutes from './routes/auth.routes'
 import centerRoutes from './routes/center.routes'
 import containerTypeRoutes from './routes/containerType.routes'
 import containerRoutes from './routes/container.routes'
+import dashboardRoutes from './routes/dashboard.routes'
 import errorHandler from './middleware/errorHandler'
 
 dotenv.config()
@@ -120,6 +121,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/centers', centerRoutes)
 app.use('/api/container-types', containerTypeRoutes)
 app.use('/api/containers', containerRoutes)
+app.use('/api/dashboard', dashboardRoutes)
 
 // Error handling
 app.use(errorHandler)

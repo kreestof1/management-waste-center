@@ -4,12 +4,12 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Management Waste Center API',
+      title: 'Container Fill-Level Tracking API',
       version: '1.0.0',
-      description: 'API REST pour la gestion de centre de traitement des déchets',
+      description: 'API REST pour le suivi du taux de remplissage des conteneurs dans les déchetteries',
       contact: {
         name: 'API Support',
-        email: 'support@waste-management.com',
+        email: 'support@container-tracking.com',
       },
       license: {
         name: 'MIT',
@@ -32,153 +32,254 @@ const options: swaggerJsdoc.Options = {
         description: 'Health check endpoints',
       },
       {
-        name: 'Wastes',
-        description: 'Waste management endpoints',
+        name: 'Auth',
+        description: 'Authentication and authorization endpoints',
+      },
+      {
+        name: 'Centers',
+        description: 'Recycling center management',
+      },
+      {
+        name: 'Container Types',
+        description: 'Container type management',
+      },
+      {
+        name: 'Containers',
+        description: 'Container management and status tracking',
+      },
+      {
+        name: 'Dashboard',
+        description: 'Manager dashboard with statistics and alerts',
       },
     ],
     components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
       schemas: {
-        Waste: {
+        User: {
           type: 'object',
-          required: ['type', 'weight', 'collectionDate'],
+          required: ['email', 'passwordHash', 'firstName', 'lastName', 'role'],
           properties: {
             _id: {
               type: 'string',
-              description: 'ID unique du déchet',
+              description: 'User ID',
               example: '507f1f77bcf86cd799439011',
             },
-            type: {
+            email: {
               type: 'string',
-              enum: ['plastic', 'glass', 'paper', 'metal', 'organic', 'electronic', 'hazardous', 'other'],
-              description: 'Type de déchet',
-              example: 'plastic',
+              format: 'email',
+              description: 'Email address (unique)',
+              example: 'user@example.com',
             },
-            weight: {
+            firstName: {
+              type: 'string',
+              description: 'First name',
+              example: 'Jean',
+            },
+            lastName: {
+              type: 'string',
+              description: 'Last name',
+              example: 'Dupont',
+            },
+            role: {
+              type: 'string',
+              enum: ['visitor', 'user', 'agent', 'manager', 'superadmin'],
+              description: 'User role',
+              example: 'user',
+            },
+            centerIds: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+              description: 'Recycling centers associated with manager',
+              example: ['507f1f77bcf86cd799439011'],
+            },
+            preferences: {
+              type: 'object',
+              properties: {
+                locale: {
+                  type: 'string',
+                  enum: ['fr', 'en'],
+                  default: 'fr',
+                },
+              },
+            },
+          },
+        },
+        RecyclingCenter: {
+          type: 'object',
+          required: ['name', 'address', 'coordinates'],
+          properties: {
+            _id: {
+              type: 'string',
+              description: 'Center ID',
+              example: '507f1f77bcf86cd799439011',
+            },
+            name: {
+              type: 'string',
+              description: 'Center name',
+              example: 'Déchetterie de Lyon Nord',
+            },
+            address: {
+              type: 'string',
+              description: 'Physical address',
+              example: '123 Rue de la République, 69001 Lyon',
+            },
+            coordinates: {
+              type: 'object',
+              properties: {
+                lat: {
+                  type: 'number',
+                  description: 'Latitude',
+                  example: 45.7640,
+                },
+                lng: {
+                  type: 'number',
+                  description: 'Longitude',
+                  example: 4.8357,
+                },
+              },
+            },
+            phone: {
+              type: 'string',
+              example: '+33 4 12 34 56 78',
+            },
+            openingHours: {
+              type: 'object',
+              description: 'Opening hours per day',
+            },
+            active: {
+              type: 'boolean',
+              default: true,
+            },
+          },
+        },
+        ContainerType: {
+          type: 'object',
+          required: ['label'],
+          properties: {
+            _id: {
+              type: 'string',
+              example: '507f1f77bcf86cd799439011',
+            },
+            label: {
+              type: 'string',
+              description: 'Type label',
+              example: 'Bois',
+            },
+            icon: {
+              type: 'string',
+              description: 'Material UI icon name',
+              example: 'Carpenter',
+            },
+            color: {
+              type: 'string',
+              description: 'Hex color code',
+              example: '#8B4513',
+            },
+          },
+        },
+        Container: {
+          type: 'object',
+          required: ['centerId', 'typeId', 'label', 'state'],
+          properties: {
+            _id: {
+              type: 'string',
+              example: '507f1f77bcf86cd799439011',
+            },
+            centerId: {
+              type: 'string',
+              description: 'Reference to RecyclingCenter',
+              example: '507f1f77bcf86cd799439012',
+            },
+            typeId: {
+              type: 'string',
+              description: 'Reference to ContainerType',
+              example: '507f1f77bcf86cd799439013',
+            },
+            label: {
+              type: 'string',
+              description: 'Container label/identifier',
+              example: 'Bois-A1',
+            },
+            state: {
+              type: 'string',
+              enum: ['empty', 'full', 'maintenance'],
+              description: 'Current container state',
+              example: 'empty',
+            },
+            capacityLiters: {
               type: 'number',
-              description: 'Poids en kilogrammes',
-              minimum: 0,
-              example: 25.5,
+              description: 'Container capacity in liters',
+              example: 1000,
             },
-            collectionDate: {
+            locationHint: {
               type: 'string',
-              format: 'date-time',
-              description: 'Date de collecte',
-              example: '2026-01-15T10:00:00Z',
+              description: 'Location description',
+              example: 'Près de l'entrée principale',
             },
-            status: {
+            active: {
+              type: 'boolean',
+              default: true,
+            },
+          },
+        },
+        StatusEvent: {
+          type: 'object',
+          required: ['containerId', 'newState', 'source'],
+          properties: {
+            _id: {
               type: 'string',
-              enum: ['collected', 'processing', 'processed', 'recycled'],
-              description: 'Statut du traitement',
-              example: 'collected',
+              example: '507f1f77bcf86cd799439011',
             },
-            description: {
+            containerId: {
+              type: 'string',
+              description: 'Reference to Container',
+              example: '507f1f77bcf86cd799439012',
+            },
+            newState: {
+              type: 'string',
+              enum: ['empty', 'full'],
+              description: 'New container state',
+              example: 'full',
+            },
+            authorId: {
+              type: 'string',
+              description: 'User who declared status',
+              example: '507f1f77bcf86cd799439013',
+            },
+            source: {
+              type: 'string',
+              enum: ['user', 'agent', 'manager', 'sensor', 'import'],
+              description: 'Source of status declaration',
+              example: 'user',
+            },
+            comment: {
               type: 'string',
               maxLength: 500,
-              description: 'Description optionnelle',
-              example: 'Bouteilles plastiques collectées',
+              example: 'Container is completely full',
             },
-            location: {
+            evidence: {
               type: 'string',
-              maxLength: 200,
-              description: 'Localisation optionnelle',
-              example: 'Zone A - Conteneur 3',
+              description: 'Photo URL',
+              example: 'https://storage.example.com/photos/abc123.jpg',
+            },
+            confidence: {
+              type: 'number',
+              minimum: 0,
+              maximum: 1,
+              description: 'Confidence score (0-1)',
+              example: 0.95,
             },
             createdAt: {
               type: 'string',
               format: 'date-time',
-              description: 'Date de création',
-            },
-            updatedAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Date de dernière modification',
-            },
-          },
-        },
-        WasteInput: {
-          type: 'object',
-          required: ['type', 'weight', 'collectionDate'],
-          properties: {
-            type: {
-              type: 'string',
-              enum: ['plastic', 'glass', 'paper', 'metal', 'organic', 'electronic', 'hazardous', 'other'],
-              example: 'plastic',
-            },
-            weight: {
-              type: 'number',
-              minimum: 0,
-              example: 25.5,
-            },
-            collectionDate: {
-              type: 'string',
-              format: 'date-time',
-              example: '2026-01-15T10:00:00Z',
-            },
-            status: {
-              type: 'string',
-              enum: ['collected', 'processing', 'processed', 'recycled'],
-              example: 'collected',
-            },
-            description: {
-              type: 'string',
-              maxLength: 500,
-              example: 'Bouteilles plastiques collectées',
-            },
-            location: {
-              type: 'string',
-              maxLength: 200,
-              example: 'Zone A - Conteneur 3',
-            },
-          },
-        },
-        WasteStats: {
-          type: 'object',
-          properties: {
-            totalWastes: {
-              type: 'number',
-              description: 'Nombre total de déchets',
-              example: 1234,
-            },
-            totalWeight: {
-              type: 'number',
-              description: 'Poids total en kilogrammes',
-              example: 15678.5,
-            },
-            wastesByType: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  _id: {
-                    type: 'string',
-                    example: 'plastic',
-                  },
-                  count: {
-                    type: 'number',
-                    example: 523,
-                  },
-                  totalWeight: {
-                    type: 'number',
-                    example: 6543.2,
-                  },
-                },
-              },
-            },
-            wastesByStatus: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  _id: {
-                    type: 'string',
-                    example: 'collected',
-                  },
-                  count: {
-                    type: 'number',
-                    example: 425,
-                  },
-                },
-              },
             },
           },
         },
