@@ -126,7 +126,7 @@ const ManageCenters: React.FC = () => {
         try {
             setLoading(true);
             const [centersData, containersData] = await Promise.all([
-                getCenters(),
+                getCenters(true), // Include inactive centers for management page
                 getAllContainers(),
             ]);
 

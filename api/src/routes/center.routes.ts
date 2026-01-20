@@ -18,6 +18,11 @@ const router = express.Router()
  *         schema:
  *           type: boolean
  *         description: Filter to user's assigned centers (managers only)
+ *       - in: query
+ *         name: includeInactive
+ *         schema:
+ *           type: boolean
+ *         description: Include inactive centers (superadmins only)
  *     responses:
  *       200:
  *         description: List of centers

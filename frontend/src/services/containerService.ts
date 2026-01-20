@@ -53,8 +53,9 @@ export interface StatusEvent {
 }
 
 // Recycling Centers
-export const getCenters = async (): Promise<RecyclingCenter[]> => {
-    const response = await api.get('/centers');
+export const getCenters = async (includeInactive?: boolean): Promise<RecyclingCenter[]> => {
+    const params = includeInactive ? { includeInactive: 'true' } : {};
+    const response = await api.get('/centers', { params });
     return response.data.centers || response.data;
 };
 

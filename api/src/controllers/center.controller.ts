@@ -8,8 +8,15 @@ import mongoose from 'mongoose'
 export const getAllCenters = async (req: AuthRequest, res: Response) => {
   try {
     const user = req.user
+    const { includeInactive } = req.query
 
-    let query: any = { active: true }
+    let query: any = {}
+
+    // For superadmins with includeInactive flag, show all centers
+    // Otherwise, only show active centers
+    if (!(user?.role === 'superadmin' && includeInactive === 'true')) {
+      query.active = true
+    }
 
     // Filter by visibility based on user role
     if (user?.role === 'visitor' || user?.role === 'user') {
