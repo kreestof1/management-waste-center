@@ -498,7 +498,7 @@ const ManageCenters: React.FC = () => {
                                                 size="small"
                                                 onClick={() => handleDeleteClick(center)}
                                                 color="error"
-                                                disabled={center.containerCount && center.containerCount > 0}
+                                                disabled={!!(center.containerCount && center.containerCount > 0)}
                                             >
                                                 <DeleteIcon />
                                             </IconButton>
