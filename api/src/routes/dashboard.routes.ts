@@ -1,8 +1,45 @@
 import express from 'express';
-import { getCenterStats, getAlerts, getRotationMetrics } from '../controllers/dashboard.controller';
+import { getCenterStats, getAlerts, getRotationMetrics, getGlobalStats } from '../controllers/dashboard.controller';
 import { authenticate, authorize } from '../middleware/auth.middleware';
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * /api/dashboard/stats:
+ *   get:
+ *     summary: Get global dashboard statistics
+ *     tags: [Dashboard]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Global statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalContainers:
+ *                   type: integer
+ *                   description: Total number of active containers
+ *                 stateCounts:
+ *                   type: object
+ *                   properties:
+ *                     empty:
+ *                       type: integer
+ *                     full:
+ *                       type: integer
+ *                     maintenance:
+ *                       type: integer
+ *                 monthlyEvolution:
+ *                   type: number
+ *                   description: Monthly evolution percentage
+ *                 collectionsToday:
+ *                   type: integer
+ *                   description: Number of collections today
+ */
+router.get('/stats', authenticate, getGlobalStats);
 
 /**
  * @swagger

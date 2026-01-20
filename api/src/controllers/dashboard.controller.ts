@@ -370,3 +370,75 @@ export const getRotationMetrics = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ message: 'Erreur lors de la récupération des métriques de rotation' });
     }
 };
+
+/**
+ * Get global dashboard statistics (for regular users)
+ * @route GET /api/dashboard/stats
+ * @access All authenticated users
+ */
+export const getGlobalStats = async (req: AuthRequest, res: Response) => {
+    try {
+        // Get total container count (all active containers across all centers)
+        const totalContainers = await Container.countDocuments({ active: true });
+
+        // Get container counts by state globally
+        const containersByState = await Container.aggregate([
+            { $match: { active: true } },
+            {
+                $group: {
+                    _id: '$state',
+                    count: { $sum: 1 },
+                },
+            },
+        ]);
+
+        const stateCounts = {
+            empty: 0,
+            full: 0,
+            maintenance: 0,
+        };
+
+        containersByState.forEach((item) => {
+            stateCounts[item._id as keyof typeof stateCounts] = item.count;
+        });
+
+        // Calculate monthly evolution based on containers created in last 30 days vs previous 30 days
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+
+        const [currentMonthContainers, previousMonthContainers] = await Promise.all([
+            Container.countDocuments({ 
+                active: true, 
+                createdAt: { $gte: thirtyDaysAgo } 
+            }),
+            Container.countDocuments({ 
+                active: true, 
+                createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } 
+            }),
+        ]);
+
+        const monthlyEvolution = previousMonthContainers > 0 
+            ? ((currentMonthContainers - previousMonthContainers) / previousMonthContainers) * 100
+            : currentMonthContainers > 0 ? 100 : 0;
+
+        // Get collections today (status changes from full to empty)
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        const collectionsToday = await StatusEvent.countDocuments({
+            newState: 'empty',
+            createdAt: { $gte: todayStart },
+        });
+
+        res.json({
+            totalContainers,
+            stateCounts,
+            monthlyEvolution: Math.round(monthlyEvolution * 10) / 10,
+            collectionsToday,
+        });
+    } catch (error) {
+        console.error('Error fetching global dashboard stats:', error);
+        res.status(500).json({ message: 'Erreur lors de la récupération des statistiques globales' });
+    }
+};

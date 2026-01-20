@@ -148,6 +148,12 @@ export const getCenterAlerts = async (centerId: string, alertThresholdHours: num
     return response.data;
 };
 
+// Global dashboard stats (for all users)
+export const getGlobalStats = async () => {
+    const response = await api.get('/dashboard/stats');
+    return response.data;
+};
+
 export const getRotationMetrics = async (centerId: string, days: number = 30) => {
     const response = await api.get(`/dashboard/centers/${centerId}/rotation-metrics`, {
         params: { days },
