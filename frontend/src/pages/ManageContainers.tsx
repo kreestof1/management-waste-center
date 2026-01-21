@@ -189,7 +189,7 @@ const ManageContainers: React.FC = () => {
             setFormData({
                 label: container.label,
                 centerId: typeof container.centerId === 'string' ? container.centerId : container.centerId._id,
-                typeId: container.typeId._id,
+                typeId: typeof container.typeId === 'string' ? container.typeId : container.typeId._id,
                 capacityLiters: container.capacityLiters?.toString() || '',
                 locationHint: container.locationHint || '',
                 state: container.state === 'maintenance' ? 'empty' : container.state,
@@ -238,15 +238,20 @@ const ManageContainers: React.FC = () => {
                 capacityLiters: formData.capacityLiters ? parseInt(formData.capacityLiters) : undefined,
             };
 
+            console.log('Submitting container data:', data);
+            console.log('Selected container:', selectedContainer);
+
             if (selectedContainer) {
-                await updateContainer(selectedContainer._id, data);
+                const updatedContainer = await updateContainer(selectedContainer._id, data);
+                console.log('Updated container response:', updatedContainer);
                 setSnackbar({
                     open: true,
                     message: 'Conteneur modifié avec succès',
                     severity: 'success',
                 });
             } else {
-                await createContainer(data);
+                const newContainer = await createContainer(data);
+                console.log('Created container response:', newContainer);
                 setSnackbar({
                     open: true,
                     message: 'Conteneur créé avec succès',

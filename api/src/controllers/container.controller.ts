@@ -158,7 +158,7 @@ export const createContainer = async (req: AuthRequest, res: Response) => {
 export const updateContainer = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params
-        const { label, capacityLiters, locationHint } = req.body
+        const { label, centerId, typeId, capacityLiters, locationHint } = req.body
 
         const container = await Container.findById(id)
 
@@ -169,6 +169,8 @@ export const updateContainer = async (req: AuthRequest, res: Response) => {
         }
 
         if (label !== undefined) container.label = label
+        if (centerId !== undefined) container.centerId = centerId
+        if (typeId !== undefined) container.typeId = typeId
         if (capacityLiters !== undefined) container.capacityLiters = capacityLiters
         if (locationHint !== undefined) container.locationHint = locationHint
 
@@ -180,12 +182,21 @@ export const updateContainer = async (req: AuthRequest, res: Response) => {
             action: 'CONTAINER_UPDATED',
             entityType: 'container',
             entityId: container._id,
-            metadata: { label: container.label },
+            metadata: {
+                label: container.label,
+                centerId: container.centerId,
+                typeId: container.typeId
+            },
         })
+
+        // Populate the response to match the expected format
+        const populatedContainer = await Container.findById(container._id)
+            .populate('typeId', 'label icon color')
+            .populate('centerId', 'name address')
 
         return res.status(200).json({
             message: 'Conteneur mis à jour avec succès',
-            container,
+            container: populatedContainer,
         })
     } catch (error) {
         console.error('Update container error:', error)
