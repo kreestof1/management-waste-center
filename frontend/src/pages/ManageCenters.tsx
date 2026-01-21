@@ -83,6 +83,7 @@ const ManageCenters: React.FC = () => {
     const [formData, setFormData] = useState({
         name: '',
         address: '',
+        description: '',
         lat: '',
         lng: '',
         publicVisibility: true,
@@ -155,6 +156,7 @@ const ManageCenters: React.FC = () => {
         setFormData({
             name: '',
             address: '',
+            description: '',
             lat: '',
             lng: '',
             publicVisibility: true,
@@ -211,6 +213,7 @@ const ManageCenters: React.FC = () => {
         setFormData({
             name: center.name,
             address: center.address,
+            description: center.description || '',
             lat: center.geo.lat.toString(),
             lng: center.geo.lng.toString(),
             publicVisibility: center.publicVisibility,
@@ -235,6 +238,7 @@ const ManageCenters: React.FC = () => {
             const centerData = {
                 name: formData.name.trim(),
                 address: formData.address.trim(),
+                description: formData.description.trim() || undefined,
                 geo: {
                     lat: parseFloat(formData.lat),
                     lng: parseFloat(formData.lng),
@@ -418,7 +422,8 @@ const ManageCenters: React.FC = () => {
                     <TableHead>
                         <TableRow>
                             <TableCell>Nom</TableCell>
-                            <TableCell>Adresse</TableCell>
+                            {/* <TableCell>Adresse</TableCell> */}
+                            {/* <TableCell>Description</TableCell> */}
                             <TableCell align="center">Statut</TableCell>
                             <TableCell align="center">Visibilité</TableCell>
                             <TableCell align="center">Coordonnées</TableCell>
@@ -436,11 +441,22 @@ const ManageCenters: React.FC = () => {
                                             {center.name}
                                         </Typography>
                                     </TableCell>
-                                    <TableCell>
+                                    {/* <TableCell>
                                         <Typography variant="body2" color="text.secondary">
                                             {center.address}
                                         </Typography>
-                                    </TableCell>
+                                    </TableCell> */}
+                                    {/* <TableCell>
+                                        <Typography variant="body2" color="text.secondary"
+                                            sx={{
+                                                maxWidth: 200,
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap'
+                                            }}>
+                                            {center.description || '-'}
+                                        </Typography>
+                                    </TableCell> */}
                                     <TableCell align="center">
                                         <Chip
                                             icon={center.active ? <ActiveIcon /> : <InactiveIcon />}
@@ -588,6 +604,17 @@ const ManageCenters: React.FC = () => {
                                 onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                                 error={!!errors.address}
                                 helperText={errors.address}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                label="Description"
+                                fullWidth
+                                multiline
+                                rows={3}
+                                value={formData.description}
+                                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                                helperText="Description optionnelle du centre de recyclage"
                             />
                         </Grid>
                         <Grid item xs={12} sm={6}>

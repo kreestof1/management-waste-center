@@ -4,6 +4,7 @@ export interface RecyclingCenter {
     _id: string;
     name: string;
     address: string;
+    description?: string;
     geo: {
         lat: number;
         lng: number;
@@ -67,6 +68,7 @@ export const getCenterById = async (id: string): Promise<RecyclingCenter> => {
 export const createCenter = async (data: {
     name: string;
     address: string;
+    description?: string;
     geo: { lat: number; lng: number };
     publicVisibility?: boolean;
     openingHours?: Array<{ day: string; open: string; close: string }>;
@@ -80,6 +82,7 @@ export const updateCenter = async (
     data: {
         name?: string;
         address?: string;
+        description?: string;
         geo?: { lat: number; lng: number };
         publicVisibility?: boolean;
         openingHours?: Array<{ day: string; open: string; close: string }>;

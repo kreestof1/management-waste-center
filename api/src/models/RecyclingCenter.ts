@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose'
 export interface IRecyclingCenter extends Document {
   name: string
   address: string
+  description?: string
   geo: {
     lat: number
     lng: number
@@ -28,6 +29,10 @@ const RecyclingCenterSchema = new Schema<IRecyclingCenter>(
     address: {
       type: String,
       required: [true, 'Address is required'],
+      trim: true,
+    },
+    description: {
+      type: String,
       trim: true,
     },
     geo: {
