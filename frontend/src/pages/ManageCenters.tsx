@@ -133,9 +133,25 @@ const ManageCenters: React.FC = () => {
 
             // Count containers per center
             const centerStats = centersData.map(center => {
-                const containerCount = containersData.containers?.filter(
-                    container => container.centerId === center._id
-                ).length || 0;
+                const containerCount = containersData.containers?.filter(container => {
+                    // Handle both string centerId and populated object centerId
+                    const containerCenterId = typeof container.centerId === 'string'
+                        ? container.centerId
+                        : container.centerId?._id || container.centerId?.toString();
+
+                    return containerCenterId === center._id?.toString();
+                }).length || 0;
+
+                // Debug logging
+                console.log(`Center ${center.name} (${center._id}): ${containerCount} containers`);
+                if (containerCount === 0 && containersData.containers?.length > 0) {
+                    console.log('Sample container centerIds:', containersData.containers.slice(0, 3).map(c => ({
+                        id: c._id,
+                        centerId: c.centerId,
+                        centerIdType: typeof c.centerId
+                    })));
+                }
+
                 return { ...center, containerCount };
             });
 
@@ -510,14 +526,16 @@ const ManageCenters: React.FC = () => {
                                             </IconButton>
                                         </Tooltip>
                                         <Tooltip title="Supprimer">
-                                            <IconButton
-                                                size="small"
-                                                onClick={() => handleDeleteClick(center)}
-                                                color="error"
-                                                disabled={!!(center.containerCount && center.containerCount > 0)}
-                                            >
-                                                <DeleteIcon />
-                                            </IconButton>
+                                            <span>
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => handleDeleteClick(center)}
+                                                    color="error"
+                                                    disabled={!!(center.containerCount && center.containerCount > 0)}
+                                                >
+                                                    <DeleteIcon />
+                                                </IconButton>
+                                            </span>
                                         </Tooltip>
                                     </TableCell>
                                 </TableRow>

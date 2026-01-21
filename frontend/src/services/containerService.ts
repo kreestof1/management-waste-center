@@ -26,7 +26,7 @@ export interface ContainerType {
 
 export interface Container {
     _id: string;
-    centerId: string;
+    centerId: string | RecyclingCenter;
     typeId: ContainerType;
     label: string;
     state: 'empty' | 'full' | 'maintenance';

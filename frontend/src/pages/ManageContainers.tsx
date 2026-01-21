@@ -188,7 +188,7 @@ const ManageContainers: React.FC = () => {
             setSelectedContainer(container);
             setFormData({
                 label: container.label,
-                centerId: container.centerId,
+                centerId: typeof container.centerId === 'string' ? container.centerId : container.centerId._id,
                 typeId: container.typeId._id,
                 capacityLiters: container.capacityLiters?.toString() || '',
                 locationHint: container.locationHint || '',
