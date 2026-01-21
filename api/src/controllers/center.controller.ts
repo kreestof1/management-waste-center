@@ -122,7 +122,7 @@ export const createCenter = async (req: AuthRequest, res: Response) => {
 export const updateCenter = async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params
-    const { name, address, geo, publicVisibility, openingHours, active } = req.body
+    const { name, address, description, geo, publicVisibility, openingHours, active } = req.body
 
     const center = await RecyclingCenter.findById(id)
 
@@ -135,6 +135,7 @@ export const updateCenter = async (req: AuthRequest, res: Response) => {
     // Update fields
     if (name !== undefined) center.name = name
     if (address !== undefined) center.address = address
+    if (description !== undefined) center.description = description
     if (geo !== undefined) center.geo = geo
     if (publicVisibility !== undefined) center.publicVisibility = publicVisibility
     if (openingHours !== undefined) center.openingHours = openingHours
@@ -148,7 +149,7 @@ export const updateCenter = async (req: AuthRequest, res: Response) => {
       action: 'CENTER_UPDATED',
       entityType: 'center',
       entityId: center._id,
-      metadata: { name: center.name },
+      metadata: { name: center.name, description: center.description },
     })
 
     return res.status(200).json({
