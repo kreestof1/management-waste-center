@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import api from '../services/api';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api, { setLogoutCallback } from '../services/api';
 
 interface User {
   id: string;
@@ -43,6 +44,37 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const navigate = useNavigate();
+
+  const logout = useCallback(async () => {
+    // Prevent multiple simultaneous logout calls
+    if (isLoggingOut) {
+      return;
+    }
+
+    setIsLoggingOut(true);
+
+    // Call logout endpoint first while we still have the token
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      // Ignore logout endpoint errors - we still want to clear local state
+      console.log('Logout endpoint call failed, but continuing with local logout');
+    }
+
+    // Then clear local state
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setUser(null);
+    setIsLoggingOut(false);
+    navigate('/login');
+  }, [navigate, isLoggingOut]);
+
+  // Register logout callback with API service for token expiration handling
+  useEffect(() => {
+    setLogoutCallback(logout);
+  }, [logout]);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -88,17 +120,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Registration failed');
     }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    setUser(null);
-    
-    // Optionally call logout endpoint
-    api.post('/auth/logout').catch(() => {
-      // Ignore errors on logout
-    });
   };
 
   const value: AuthContextType = {

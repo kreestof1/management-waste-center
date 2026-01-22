@@ -7,6 +7,13 @@ const api = axios.create({
   },
 });
 
+// Store reference to logout function for token expiration handling
+let logoutCallback: (() => void) | null = null;
+
+export const setLogoutCallback = (callback: () => void) => {
+  logoutCallback = callback;
+};
+
 // Request interceptor to add JWT token
 api.interceptors.request.use(
   (config) => {
@@ -51,7 +58,14 @@ api.interceptors.response.use(
         // Refresh failed, clear tokens and redirect to login
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+
+        // Use logout callback if available, otherwise fallback to window.location
+        if (logoutCallback) {
+          logoutCallback();
+        } else {
+          window.location.href = '/login';
+        }
+
         return Promise.reject(refreshError);
       }
     }

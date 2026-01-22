@@ -11,9 +11,11 @@ import {
   TableRow,
   Button,
   CircularProgress,
+  Alert,
+  Snackbar,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import axios from 'axios'
+import api from '../services/api'
 
 interface Waste {
   _id: string
@@ -26,6 +28,12 @@ interface Waste {
 export default function WasteList() {
   const [wastes, setWastes] = useState<Waste[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error'
+  })
 
   useEffect(() => {
     fetchWastes()
@@ -33,14 +41,22 @@ export default function WasteList() {
 
   const fetchWastes = async () => {
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || '/api'
-      const response = await axios.get(`${apiUrl}/wastes`)
+      setLoading(true)
+      setError('')
+      const response = await api.get('/wastes')
       setWastes(response.data)
-    } catch (error) {
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Erreur lors du chargement des déchets'
+      setError(message)
+      setSnackbar({ open: true, message, severity: 'error' })
       console.error('Erreur lors du chargement des déchets:', error)
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleCloseSnackbar = () => {
+    setSnackbar(prev => ({ ...prev, open: false }))
   }
 
   if (loading) {
@@ -61,6 +77,12 @@ export default function WasteList() {
           Nouveau Déchet
         </Button>
       </Box>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       <TableContainer component={Paper}>
         <Table>
@@ -94,6 +116,17 @@ export default function WasteList() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert severity={snackbar.severity} onClose={handleCloseSnackbar}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }
