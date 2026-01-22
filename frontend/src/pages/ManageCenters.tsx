@@ -25,18 +25,16 @@ import {
     Select,
     MenuItem,
     TablePagination,
-    Toolbar,
-    Tooltip,
     Switch,
     FormControlLabel,
     Grid,
     Divider,
+    Tooltip,
 } from '@mui/material';
 import {
     Add as AddIcon,
     Edit as EditIcon,
     Delete as DeleteIcon,
-    FilterList as FilterIcon,
     Clear as ClearIcon,
     Search as SearchIcon,
     LocationOn as LocationIcon,
@@ -60,6 +58,22 @@ interface CenterWithStats extends RecyclingCenter {
     containerCount?: number;
 }
 
+type DayOpeningHours = {
+    open: string;
+    close: string;
+    closed: boolean;
+};
+
+type WeeklyHours = {
+    monday: DayOpeningHours;
+    tuesday: DayOpeningHours;
+    wednesday: DayOpeningHours;
+    thursday: DayOpeningHours;
+    friday: DayOpeningHours;
+    saturday: DayOpeningHours;
+    sunday: DayOpeningHours;
+};
+
 const ManageCenters: React.FC = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
@@ -70,6 +84,28 @@ const ManageCenters: React.FC = () => {
             navigate('/');
         }
     }, [user, navigate]);
+
+    // Day mapping from English to French for backend compatibility
+    const dayMapping = {
+        monday: 'Lundi',
+        tuesday: 'Mardi',
+        wednesday: 'Mercredi',
+        thursday: 'Jeudi',
+        friday: 'Vendredi',
+        saturday: 'Samedi',
+        sunday: 'Dimanche',
+    };
+
+    // Reverse mapping from French to English for editing
+    const reverseDayMapping = {
+        'Lundi': 'monday',
+        'Mardi': 'tuesday',
+        'Mercredi': 'wednesday',
+        'Jeudi': 'thursday',
+        'Vendredi': 'friday',
+        'Samedi': 'saturday',
+        'Dimanche': 'sunday',
+    };
 
     // State
     const [centers, setCenters] = useState<CenterWithStats[]>([]);
@@ -96,7 +132,7 @@ const ManageCenters: React.FC = () => {
             friday: { open: '08:00', close: '18:00', closed: false },
             saturday: { open: '08:00', close: '16:00', closed: false },
             sunday: { open: '', close: '', closed: true },
-        },
+        } as WeeklyHours,
     });
 
     // Filters and pagination
@@ -185,7 +221,7 @@ const ManageCenters: React.FC = () => {
                 friday: { open: '08:00', close: '18:00', closed: false },
                 saturday: { open: '08:00', close: '16:00', closed: false },
                 sunday: { open: '', close: '', closed: true },
-            },
+            } as WeeklyHours,
         });
         setErrors({});
         setIsEditing(false);
@@ -226,6 +262,41 @@ const ManageCenters: React.FC = () => {
     const handleEdit = (center: CenterWithStats) => {
         setSelectedCenter(center);
         setIsEditing(true);
+
+        // Convert opening hours from backend format to frontend format
+        const defaultHours = {
+            monday: { open: '08:00', close: '18:00', closed: false },
+            tuesday: { open: '08:00', close: '18:00', closed: false },
+            wednesday: { open: '08:00', close: '18:00', closed: false },
+            thursday: { open: '08:00', close: '18:00', closed: false },
+            friday: { open: '08:00', close: '18:00', closed: false },
+            saturday: { open: '08:00', close: '16:00', closed: false },
+            sunday: { open: '', close: '', closed: true },
+        };
+
+        let convertedHours = { ...defaultHours };
+
+        if (center.openingHours && Array.isArray(center.openingHours)) {
+            // First mark all days as closed
+            Object.keys(convertedHours).forEach(day => {
+                convertedHours[day as keyof WeeklyHours].closed = true;
+                convertedHours[day as keyof WeeklyHours].open = '';
+                convertedHours[day as keyof WeeklyHours].close = '';
+            });
+
+            // Then set the open days
+            center.openingHours.forEach(dayHours => {
+                const englishDay = reverseDayMapping[dayHours.day as keyof typeof reverseDayMapping];
+                if (englishDay) {
+                    convertedHours[englishDay as keyof WeeklyHours] = {
+                        open: dayHours.open,
+                        close: dayHours.close,
+                        closed: false,
+                    };
+                }
+            });
+        }
+
         setFormData({
             name: center.name,
             address: center.address,
@@ -234,15 +305,7 @@ const ManageCenters: React.FC = () => {
             lng: center.geo.lng.toString(),
             publicVisibility: center.publicVisibility,
             active: center.active,
-            openingHours: center.openingHours || {
-                monday: { open: '08:00', close: '18:00', closed: false },
-                tuesday: { open: '08:00', close: '18:00', closed: false },
-                wednesday: { open: '08:00', close: '18:00', closed: false },
-                thursday: { open: '08:00', close: '18:00', closed: false },
-                friday: { open: '08:00', close: '18:00', closed: false },
-                saturday: { open: '08:00', close: '16:00', closed: false },
-                sunday: { open: '', close: '', closed: true },
-            },
+            openingHours: convertedHours as WeeklyHours,
         });
         setDialogOpen(true);
     };
@@ -261,7 +324,13 @@ const ManageCenters: React.FC = () => {
                 },
                 publicVisibility: formData.publicVisibility,
                 active: formData.active,
-                openingHours: formData.openingHours,
+                openingHours: Object.entries(formData.openingHours)
+                    .filter(([, hours]) => !hours.closed)
+                    .map(([day, hours]) => ({
+                        day: dayMapping[day as keyof typeof dayMapping],
+                        open: hours.open,
+                        close: hours.close,
+                    })),
             };
 
             if (isEditing && selectedCenter) {
@@ -335,7 +404,7 @@ const ManageCenters: React.FC = () => {
         page * rowsPerPage + rowsPerPage
     );
 
-    const handleOpeningHoursChange = (day: string, field: 'open' | 'close' | 'closed', value: string | boolean) => {
+    const handleOpeningHoursChange = (day: keyof WeeklyHours, field: 'open' | 'close' | 'closed', value: string | boolean) => {
         setFormData(prev => ({
             ...prev,
             openingHours: {
@@ -594,7 +663,7 @@ const ManageCenters: React.FC = () => {
                                 label="Nom du Centre"
                                 fullWidth
                                 required
-                                value={formData.name}
+                                value={formData.name || ''}
                                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                                 error={!!errors.name}
                                 helperText={errors.name}
@@ -618,7 +687,7 @@ const ManageCenters: React.FC = () => {
                                 required
                                 multiline
                                 rows={2}
-                                value={formData.address}
+                                value={formData.address || ''}
                                 onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                                 error={!!errors.address}
                                 helperText={errors.address}
@@ -630,7 +699,7 @@ const ManageCenters: React.FC = () => {
                                 fullWidth
                                 multiline
                                 rows={3}
-                                value={formData.description}
+                                value={formData.description || ''}
                                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                                 helperText="Description optionnelle du centre de recyclage"
                             />
@@ -641,7 +710,7 @@ const ManageCenters: React.FC = () => {
                                 fullWidth
                                 required
                                 type="number"
-                                value={formData.lat}
+                                value={formData.lat || ''}
                                 onChange={(e) => setFormData(prev => ({ ...prev, lat: e.target.value }))}
                                 error={!!errors.lat}
                                 helperText={errors.lat || 'Valeur entre -90 et +90'}
@@ -653,7 +722,7 @@ const ManageCenters: React.FC = () => {
                                 fullWidth
                                 required
                                 type="number"
-                                value={formData.lng}
+                                value={formData.lng || ''}
                                 onChange={(e) => setFormData(prev => ({ ...prev, lng: e.target.value }))}
                                 error={!!errors.lng}
                                 helperText={errors.lng || 'Valeur entre -180 et +180'}
@@ -690,7 +759,7 @@ const ManageCenters: React.FC = () => {
                                                 control={
                                                     <Switch
                                                         checked={!hours.closed}
-                                                        onChange={(e) => handleOpeningHoursChange(day, 'closed', !e.target.checked)}
+                                                        onChange={(e) => handleOpeningHoursChange(day as keyof WeeklyHours, 'closed', !e.target.checked)}
                                                         size="small"
                                                     />
                                                 }
@@ -705,8 +774,8 @@ const ManageCenters: React.FC = () => {
                                                         type="time"
                                                         size="small"
                                                         fullWidth
-                                                        value={hours.open}
-                                                        onChange={(e) => handleOpeningHoursChange(day, 'open', e.target.value)}
+                                                        value={hours.open || ''}
+                                                        onChange={(e) => handleOpeningHoursChange(day as keyof WeeklyHours, 'open', e.target.value)}
                                                         InputLabelProps={{ shrink: true }}
                                                     />
                                                 </Grid>
@@ -716,8 +785,8 @@ const ManageCenters: React.FC = () => {
                                                         type="time"
                                                         size="small"
                                                         fullWidth
-                                                        value={hours.close}
-                                                        onChange={(e) => handleOpeningHoursChange(day, 'close', e.target.value)}
+                                                        value={hours.close || ''}
+                                                        onChange={(e) => handleOpeningHoursChange(day as keyof WeeklyHours, 'close', e.target.value)}
                                                         InputLabelProps={{ shrink: true }}
                                                     />
                                                 </Grid>

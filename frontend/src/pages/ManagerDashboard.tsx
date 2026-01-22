@@ -22,8 +22,6 @@ import {
     DialogContent,
     DialogActions,
     TextField,
-    Switch,
-    FormControlLabel,
     Alert,
     CircularProgress,
     Snackbar,
@@ -48,7 +46,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { getCenterStats, getCenterAlerts, getCenters, getAllContainerTypes, createContainerType, updateContainerType, deleteContainerType, getContainerCountByType, ContainerType } from '../services/containerService';
+import { getCenterStats, getCenterAlerts, getCenters, getAllContainerTypes, createContainerType, updateContainerType, deleteContainerType, getContainerCountByType } from '../services/containerService';
 
 interface TabPanelProps {
     children?: React.ReactNode;
@@ -341,7 +339,7 @@ const ManagerDashboard: React.FC = () => {
         }
     };
 
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
         setCurrentTab(newValue);
     };
 
@@ -677,12 +675,12 @@ const ManagerDashboard: React.FC = () => {
                     <Box display="flex" flexDirection="column" gap={3} mt={1}>
                         <TextField
                             label="Libellé"
-                            value={typeFormData.label}
+                            value={typeFormData.label || ''}
                             onChange={(e) => setTypeFormData(prev => ({ ...prev, label: e.target.value }))}
                             required
                             fullWidth
                             inputProps={{ maxLength: 50 }}
-                            helperText={`${typeFormData.label.length}/50 caractères`}
+                            helperText={`${(typeFormData.label || '').length}/50 caractères`}
                         />
 
                         <FormControl fullWidth>

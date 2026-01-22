@@ -1,3 +1,4 @@
+import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Container, Box } from '@mui/material';
 import Layout from './components/Layout';

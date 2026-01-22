@@ -379,12 +379,12 @@ const ManageTypes: React.FC = () => {
                     <Box display="flex" flexDirection="column" gap={3} mt={1}>
                         <TextField
                             label="Libellé"
-                            value={formData.label}
+                            value={formData.label || ''}
                             onChange={(e) => setFormData(prev => ({ ...prev, label: e.target.value }))}
                             required
                             fullWidth
                             inputProps={{ maxLength: 50 }}
-                            helperText={`${formData.label.length}/50 caractères`}
+                            helperText={`${(formData.label || '').length}/50 caractères`}
                         />
 
                         <FormControl fullWidth>

@@ -112,7 +112,7 @@ const Register: React.FC = () => {
                                     label="First Name"
                                     name="firstName"
                                     autoComplete="given-name"
-                                    value={formData.firstName}
+                                    value={formData.firstName || ''}
                                     onChange={handleChange}
                                     disabled={loading}
                                 />
@@ -125,7 +125,7 @@ const Register: React.FC = () => {
                                     label="Last Name"
                                     name="lastName"
                                     autoComplete="family-name"
-                                    value={formData.lastName}
+                                    value={formData.lastName || ''}
                                     onChange={handleChange}
                                     disabled={loading}
                                 />
@@ -139,7 +139,7 @@ const Register: React.FC = () => {
                                     name="email"
                                     autoComplete="email"
                                     type="email"
-                                    value={formData.email}
+                                    value={formData.email || ''}
                                     onChange={handleChange}
                                     disabled={loading}
                                 />
@@ -153,7 +153,7 @@ const Register: React.FC = () => {
                                     type="password"
                                     id="password"
                                     autoComplete="new-password"
-                                    value={formData.password}
+                                    value={formData.password || ''}
                                     onChange={handleChange}
                                     disabled={loading}
                                     helperText="Minimum 6 characters"
@@ -167,7 +167,7 @@ const Register: React.FC = () => {
                                     label="Confirm Password"
                                     type="password"
                                     id="confirmPassword"
-                                    value={formData.confirmPassword}
+                                    value={formData.confirmPassword || ''}
                                     onChange={handleChange}
                                     disabled={loading}
                                 />

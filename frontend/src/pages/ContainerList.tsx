@@ -17,7 +17,6 @@ import {
     Snackbar,
 } from '@mui/material';
 import {
-    Refresh as RefreshIcon,
     History as HistoryIcon,
 } from '@mui/icons-material';
 import {
@@ -251,8 +250,6 @@ const ContainerList: React.FC = () => {
                 return state;
         }
     };
-
-    const currentCenter = centers && centers.length > 0 ? centers.find((c) => c._id === selectedCenter) : null;
 
     return (
         <Box>

@@ -1,7 +1,7 @@
 import { Box, Typography, Paper, Grid, Card, CardContent, CircularProgress, Alert } from '@mui/material';
 import { Recycling, TrendingUp, LocalShipping } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getGlobalStats } from '../services/containerService';
 
 interface GlobalStats {

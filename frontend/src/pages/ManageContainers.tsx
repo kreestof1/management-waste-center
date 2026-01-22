@@ -26,7 +26,6 @@ import {
     MenuItem,
     Checkbox,
     TablePagination,
-    Toolbar,
     Tooltip,
     LinearProgress,
 } from '@mui/material';
@@ -35,10 +34,8 @@ import {
     Edit as EditIcon,
     Delete as DeleteIcon,
     Build as MaintenanceIcon,
-    FilterList as FilterIcon,
     Clear as ClearIcon,
     Search as SearchIcon,
-    SelectAll as SelectAllIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -466,7 +463,7 @@ const ManageContainers: React.FC = () => {
                 <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
                     <TextField
                         label="Recherche"
-                        value={filters.search}
+                        value={filters.search || ''}
                         onChange={(e) => handleFilterChange('search', e.target.value)}
                         placeholder="Nom du conteneur..."
                         InputProps={{
@@ -718,7 +715,7 @@ const ManageContainers: React.FC = () => {
                     <Box display="flex" flexDirection="column" gap={3} mt={1}>
                         <TextField
                             label="Libellé"
-                            value={formData.label}
+                            value={formData.label || ''}
                             onChange={(e) => setFormData(prev => ({ ...prev, label: e.target.value }))}
                             required
                             fullWidth
@@ -767,18 +764,18 @@ const ManageContainers: React.FC = () => {
                         <TextField
                             label="Capacité (Litres)"
                             type="number"
-                            value={formData.capacityLiters}
+                            value={formData.capacityLiters || ''}
                             onChange={(e) => setFormData(prev => ({ ...prev, capacityLiters: e.target.value }))}
                             fullWidth
                         />
 
                         <TextField
                             label="Indice de localisation"
-                            value={formData.locationHint}
+                            value={formData.locationHint || ''}
                             onChange={(e) => setFormData(prev => ({ ...prev, locationHint: e.target.value }))}
                             fullWidth
                             inputProps={{ maxLength: 100 }}
-                            helperText={`${formData.locationHint.length}/100 caractères`}
+                            helperText={`${(formData.locationHint || '').length}/100 caractères`}
                         />
 
                         {!selectedContainer && (
